@@ -1,21 +1,18 @@
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
 }
 
 android {
-    namespace 'com.stebitto.colorspotter'
+    namespace 'com.stebitto.feature_camera_feed'
     compileSdk 35
 
     defaultConfig {
-        applicationId "com.stebitto.colorspotter"
         minSdk 28
-        targetSdk 35
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
@@ -38,7 +35,6 @@ android {
 
 dependencies {
 
-    implementation project(":navigation")
     implementation project(":common")
 
     implementation libs.androidx.core.ktx
@@ -51,12 +47,16 @@ dependencies {
     // koin
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.android)
-    implementation(libs.koin.test.junit)
+    implementation(libs.koin.compose)
 
     // compose
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.material3)
-    implementation(libs.compose.preview)
-    implementation(libs.compose.activity)
     implementation(libs.compose.navigation)
+    implementation(libs.compose.activity)
+    implementation(libs.compose.preview)
+    debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.compose.test.manifest)
+    androidTestImplementation platform(libs.compose.bom)
+    androidTestImplementation(libs.compose.ui.test.junit4)
 }

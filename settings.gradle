@@ -21,3 +21,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "Color spotter"
 include ':app'
+include ':common'
+include ':feature_camera_feed'
+include ':navigation'
