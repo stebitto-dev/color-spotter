@@ -62,4 +62,8 @@ dependencies {
 
     //permission
     implementation(libs.permission.accompanist)
+
+    //camera
+    implementation(libs.camera2)
+    implementation(libs.camera.view)
 }
