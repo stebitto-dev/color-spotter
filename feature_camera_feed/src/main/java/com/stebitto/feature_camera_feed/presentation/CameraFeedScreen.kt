@@ -1,35 +1,18 @@
 package com.stebitto.feature_camera_feed.presentation
 
-import android.content.res.Configuration
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
+import android.Manifest
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.stebitto.common.theme.MyApplicationTheme
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberPermissionState
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CameraFeedScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "Camera Feed Screen"
-        )
-    }
-}
+    val permissionState = rememberPermissionState(Manifest.permission.CAMERA)
 
-@Preview(name = "Light Mode")
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    showBackground = true,
-    name = "Dark Mode"
-)
-@Composable
-fun CameraFeedScreenPreview() {
-    MyApplicationTheme {  }
-    CameraFeedScreen()
+    if (permissionState.hasPermission) {
+        CameraPreview()
+    } else {
+        CameraPermission { permissionState.launchPermissionRequest() }
+    }
 }

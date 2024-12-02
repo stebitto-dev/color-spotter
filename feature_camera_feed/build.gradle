@@ -59,4 +59,7 @@ dependencies {
     debugImplementation(libs.compose.test.manifest)
     androidTestImplementation platform(libs.compose.bom)
     androidTestImplementation(libs.compose.ui.test.junit4)
+
+    //permission
+    implementation(libs.permission.accompanist)
 }
