@@ -68,4 +68,9 @@ dependencies {
     implementation(libs.camera2)
     implementation(libs.camera.view)
     implementation(libs.camera.lifecycle)
+
+    // retrofit
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson.converter)
+    implementation(libs.retrofit.logging.interceptor)
 }

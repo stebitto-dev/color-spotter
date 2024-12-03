@@ -1,13 +1,13 @@
 package com.stebitto.feature_camera_feed.presentation
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stebitto.common.MVIViewModel
 import com.stebitto.common.stateInWhileSubscribed
 import com.stebitto.feature_camera_feed.CAPTURE_ANALYSIS_INTERVAL
+import com.stebitto.feature_camera_feed.data.GetTargetAreaColorUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -20,6 +20,7 @@ import kotlinx.coroutines.withContext
 import java.util.Date
 
 internal class CameraFeedViewModel(
+    private val getTargetAreaColorUseCase: GetTargetAreaColorUseCase,
     initialState: CameraFeedState = CameraFeedState()
 ) : ViewModel(), MVIViewModel<CameraFeedState, CameraFeedIntent, CameraFeedEffect> {
 
@@ -31,56 +32,22 @@ internal class CameraFeedViewModel(
         get() = _sideEffects.receiveAsFlow()
 
     override fun dispatch(intent: CameraFeedIntent) {
-        when (intent) {
-            is CameraFeedIntent.OnFrameAnalyze -> viewModelScope.launch { onFrameAnalyze(intent.bitmap, intent.targetRadius) }
+        viewModelScope.launch {
+            when (intent) {
+                is CameraFeedIntent.OnFrameAnalyze -> onFrameAnalyze(intent.bitmap, intent.targetRadius)
+            }
         }
     }
 
     private var lastSeen = Date()
-    private suspend fun onFrameAnalyze(bitmap: Bitmap, targetRadius: Float) = withContext(Dispatchers.IO) {
-        if (Date().time - lastSeen.time < CAPTURE_ANALYSIS_INTERVAL) return@withContext
+    private suspend fun onFrameAnalyze(bitmap: Bitmap, targetRadius: Float) {
+        if (Date().time - lastSeen.time < CAPTURE_ANALYSIS_INTERVAL) return
         lastSeen = Date()
 
-        val xCoordinate = bitmap.width / 2f
-        val yCoordinate = bitmap.height / 2f
-
-        val redsList = mutableListOf<Int>()
-        val bluesList = mutableListOf<Int>()
-        val greensList = mutableListOf<Int>()
-
-        for (x in (xCoordinate - targetRadius).toInt() until (xCoordinate + targetRadius).toInt()) {
-            for (y in (yCoordinate - targetRadius).toInt() until (yCoordinate + targetRadius).toInt()) {
-                val point = bitmap.getPixel(x, y)
-                if (isPixelInCircle(x.toFloat(), y.toFloat(), xCoordinate, yCoordinate, targetRadius)) {
-                    val red = android.graphics.Color.red(point)
-                    redsList.add(red)
-                    val green = android.graphics.Color.green(point)
-                    greensList.add(green)
-                    val blue = android.graphics.Color.blue(point)
-                    bluesList.add(blue)
-                }
+        getTargetAreaColorUseCase(bitmap, targetRadius)
+            .onFailure { _state.update { state -> state.copy(colorName = "ERROR", colorRgb = Color.Red) } }
+            .onSuccess { (color, colorName) ->
+                _state.update { state -> state.copy(colorName = colorName, colorRgb = color) }
             }
-        }
-
-        val redAverage = redsList.average()
-        val greenAverage = greensList.average()
-        val blueAverage = bluesList.average()
-
-        val color = Color(redAverage.toInt(), greenAverage.toInt(), blueAverage.toInt())
-        Log.d("CameraPreview", "Color: $color")
-
-        _state.update { state -> state.copy(colorRgb = color) }
     }
-}
-
-private fun isPixelInCircle(
-    x: Float,
-    y: Float,
-    centerX: Float,
-    centerY: Float,
-    radius: Float
-): Boolean {
-    val dx = x - centerX
-    val dy = y - centerY
-    return dx * dx + dy * dy <= radius * radius
 }

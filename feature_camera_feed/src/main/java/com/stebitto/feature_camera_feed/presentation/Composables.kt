@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -101,16 +102,17 @@ internal fun CameraPreview(
             }
         )
 
-        CircleHoleOverlay(modifier = modifier)
+        CircleHoleOverlay()
 
         Box(
             modifier = Modifier
+                .safeContentPadding()
                 .align(Alignment.TopCenter)
                 .height(100.dp)
                 .background(color = state.value.colorRgb)
                 .padding(16.dp)
         ) {
-            Text(text = "Color(${state.value.colorRgb.red}, ${state.value.colorRgb.green}, ${state.value.colorRgb.blue})")
+            Text(text = state.value.colorName)
         }
     }
 }
