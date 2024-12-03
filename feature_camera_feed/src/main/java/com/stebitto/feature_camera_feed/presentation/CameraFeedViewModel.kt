@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stebitto.common.MVIViewModel
 import com.stebitto.common.stateInWhileSubscribed
+import com.stebitto.feature_camera_feed.CAPTURE_ANALYSIS_INTERVAL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Date
 
 internal class CameraFeedViewModel(
     initialState: CameraFeedState = CameraFeedState()
@@ -34,7 +36,11 @@ internal class CameraFeedViewModel(
         }
     }
 
+    private var lastSeen = Date()
     private suspend fun onFrameAnalyze(bitmap: Bitmap, targetRadius: Float) = withContext(Dispatchers.IO) {
+        if (Date().time - lastSeen.time < CAPTURE_ANALYSIS_INTERVAL) return@withContext
+        lastSeen = Date()
+
         val xCoordinate = bitmap.width / 2f
         val yCoordinate = bitmap.height / 2f
 

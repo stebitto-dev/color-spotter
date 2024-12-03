@@ -41,6 +41,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.stebitto.common.theme.MyApplicationTheme
 import com.stebitto.feature_camera_feed.R
+import com.stebitto.feature_camera_feed.TARGET_RADIUS
 import androidx.camera.core.Preview as CameraPreview
 
 @Composable
@@ -50,7 +51,6 @@ internal fun CameraPreview(
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
 
-    val radius = 100f
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -78,7 +78,7 @@ internal fun CameraPreview(
                 imageAnalysis.setAnalyzer(
                     ContextCompat.getMainExecutor(context)
                 ) { imageProxy ->
-                    viewModel.dispatch(CameraFeedIntent.OnFrameAnalyze(imageProxy.toBitmap(), radius))
+                    viewModel.dispatch(CameraFeedIntent.OnFrameAnalyze(imageProxy.toBitmap(), TARGET_RADIUS))
                     imageProxy.close()
                 }
                 it.unbindAll()
@@ -101,7 +101,7 @@ internal fun CameraPreview(
             }
         )
 
-        CircleHoleOverlay(radius = radius, modifier = modifier)
+        CircleHoleOverlay(modifier = modifier)
 
         Box(
             modifier = Modifier
@@ -117,7 +117,7 @@ internal fun CameraPreview(
 
 @Composable
 internal fun CircleHoleOverlay(
-    radius: Float = 100f,
+    radius: Float = TARGET_RADIUS,
     borderWidth: Dp = 2.dp,
     modifier: Modifier = Modifier
 ) {
