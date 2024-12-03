@@ -3,20 +3,19 @@ package com.stebitto.feature_camera_feed.presentation
 import android.content.res.Configuration
 import android.util.Size
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageProxy
-import androidx.camera.core.Preview as CameraPreview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,14 +38,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.stebitto.common.theme.MyApplicationTheme
 import com.stebitto.feature_camera_feed.R
+import androidx.camera.core.Preview as CameraPreview
 
 @Composable
 internal fun CameraPreview(
     modifier: Modifier = Modifier,
-    onFrameAnalyzed: (ImageProxy) -> Unit = {}
+    viewModel: CameraFeedViewModel
 ) {
+    val state = viewModel.state.collectAsStateWithLifecycle()
+
+    val radius = 100f
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -55,6 +59,7 @@ internal fun CameraPreview(
     val imageAnalysis = remember {
         ImageAnalysis.Builder()
             .setTargetResolution(Size(1280, 720))
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .build()
     }
 
@@ -73,7 +78,8 @@ internal fun CameraPreview(
                 imageAnalysis.setAnalyzer(
                     ContextCompat.getMainExecutor(context)
                 ) { imageProxy ->
-                    onFrameAnalyzed(imageProxy)
+                    viewModel.dispatch(CameraFeedIntent.OnFrameAnalyze(imageProxy.toBitmap(), radius))
+                    imageProxy.close()
                 }
                 it.unbindAll()
                 it.bindToLifecycle(
@@ -87,14 +93,26 @@ internal fun CameraPreview(
         }
     }
 
-    AndroidView(
-        modifier = Modifier.fillMaxSize(),
-        factory = { currentContext ->
-            PreviewView(currentContext).also { previewView = it }
-        }
-    )
+    Box(modifier.fillMaxSize()) {
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = { currentContext ->
+                PreviewView(currentContext).also { previewView = it }
+            }
+        )
 
-    CircleHoleOverlay()
+        CircleHoleOverlay(radius = radius, modifier = modifier)
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .height(100.dp)
+                .background(color = state.value.colorRgb)
+                .padding(16.dp)
+        ) {
+            Text(text = "Color(${state.value.colorRgb.red}, ${state.value.colorRgb.green}, ${state.value.colorRgb.blue})")
+        }
+    }
 }
 
 @Composable

@@ -40,6 +40,7 @@ dependencies {
 
     implementation project(":navigation")
     implementation project(":common")
+    implementation project(":feature_camera_feed")
 
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
