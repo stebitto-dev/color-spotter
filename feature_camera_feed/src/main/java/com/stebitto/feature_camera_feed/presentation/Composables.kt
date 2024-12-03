@@ -1,7 +1,14 @@
 package com.stebitto.feature_camera_feed.presentation
 
 import android.content.res.Configuration
-import androidx.camera.view.LifecycleCameraController
+import android.util.Size
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ExperimentalGetImage
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageProxy
+import androidx.camera.core.Preview as CameraPreview
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
@@ -14,7 +21,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
@@ -26,40 +37,98 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.stebitto.common.theme.MyApplicationTheme
 import com.stebitto.feature_camera_feed.R
 
 @Composable
-internal fun CameraPreview(modifier: Modifier = Modifier) {
-    // Obtain the current context and lifecycle owner
+internal fun CameraPreview(
+    modifier: Modifier = Modifier,
+    onFrameAnalyzed: (ImageProxy) -> Unit = {}
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    // Remember a LifecycleCameraController for this composable
-    val cameraController = remember {
-        LifecycleCameraController(context).apply {
-            // Bind the LifecycleCameraController to the lifecycleOwner
-            bindToLifecycle(lifecycleOwner)
+    val preview = remember { CameraPreview.Builder().build() }
+    val imageCapture = remember { ImageCapture.Builder().build() }
+    val imageAnalysis = remember {
+        ImageAnalysis.Builder()
+            .setTargetResolution(Size(1280, 720))
+            .build()
+    }
+
+    val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
+    var cameraProvider by remember { mutableStateOf<ProcessCameraProvider?>(null) }
+    var previewView by remember { mutableStateOf<PreviewView?>(null) }
+
+    LaunchedEffect(cameraProviderFuture) {
+        val provider = cameraProviderFuture.get()
+        cameraProvider = provider
+
+        provider?.let {
+            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+            previewView?.let { previewView ->
+                preview.surfaceProvider = previewView.surfaceProvider
+                imageAnalysis.setAnalyzer(
+                    ContextCompat.getMainExecutor(context)
+                ) { imageProxy ->
+                    onFrameAnalyzed(imageProxy)
+                }
+                it.unbindAll()
+                it.bindToLifecycle(
+                    lifecycleOwner,
+                    cameraSelector,
+                    preview,
+                    imageCapture,
+                    imageAnalysis
+                )
+            }
         }
     }
 
-    // Key Point: Displaying the Camera Preview
     AndroidView(
-        modifier = modifier.fillMaxSize(),
-        factory = { ctx ->
-            // Initialize the PreviewView and configure it
-            PreviewView(ctx).apply {
-                scaleType = PreviewView.ScaleType.FILL_START
-                implementationMode = PreviewView.ImplementationMode.COMPATIBLE
-                controller = cameraController // Set the controller to manage the camera lifecycle
-            }
-        },
-        onRelease = {
-            // Release the camera controller when the composable is removed from the screen
-            cameraController.unbind()
+        modifier = Modifier.fillMaxSize(),
+        factory = { currentContext ->
+            PreviewView(currentContext).also { previewView = it }
         }
     )
+
+    CircleHoleOverlay()
+}
+
+@Composable
+internal fun CircleHoleOverlay(
+    radius: Float = 100f,
+    borderWidth: Dp = 2.dp,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier.fillMaxSize()) {
+        Canvas(modifier = modifier.fillMaxSize()) {
+            // Semi transparent overlay
+            drawRect(color = Color.Black.copy(alpha = 0.8f))
+            // Stroke
+            drawCircle(
+                color = Color.White,
+                radius = radius + borderWidth.toPx() / 2,
+                style = Stroke(width = borderWidth.toPx())
+            )
+            // Target area
+            drawCircle(
+                color = Color.Transparent,
+                radius = radius,
+                blendMode = BlendMode.Clear
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFFF0000)
+@Composable
+internal fun CircleHoleOverlayPreview() {
+    MyApplicationTheme {
+        CircleHoleOverlay()
+    }
 }
 
 @Composable
@@ -85,14 +154,16 @@ internal fun CameraPermission(
     }
 }
 
-@Preview(name = "Light Mode")
+@Preview(name = "Light Mode", showBackground = true)
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_YES,
     showBackground = true,
+    backgroundColor = 0xFF000000,
     name = "Dark Mode"
 )
 @Composable
 internal fun CameraPermissionPreview() {
-    MyApplicationTheme {  }
-    CameraPermission()
+    MyApplicationTheme {
+        CameraPermission()
+    }
 }

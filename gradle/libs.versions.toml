@@ -41,6 +41,7 @@ koin-test-junit = { module = "io.insert-koin:koin-test-junit4" }
 
 camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraVersion" }
 camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraVersion" }
+camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraVersion" }
 
 permission-accompanist = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "permissionVersion" }
 
