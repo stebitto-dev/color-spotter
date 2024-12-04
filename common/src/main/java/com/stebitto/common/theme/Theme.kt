@@ -5,8 +5,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 val LightGreyScaleColorScheme = lightColorScheme(
     primary = GreyScalePalette.Grey800,
@@ -75,16 +73,6 @@ fun MyApplicationTheme(
         DarkGreyScaleColorScheme
     } else {
         LightGreyScaleColorScheme
-    }
-
-    val systemUiController = rememberSystemUiController()
-    SideEffect {
-        systemUiController.setNavigationBarColor(
-            color = if (darkTheme) GreyScalePalette.Grey700 else GreyScalePalette.Grey300
-        )
-        systemUiController.setStatusBarColor(
-            color = if (darkTheme) GreyScalePalette.Grey700 else GreyScalePalette.Grey300
-        )
     }
 
     MaterialTheme(

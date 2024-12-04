@@ -4,6 +4,9 @@ import android.content.Context
 import android.content.res.Configuration
 import android.util.Size
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageAnalysis.Analyzer
@@ -86,6 +89,13 @@ internal fun CameraPreviewScreen(
         }
     }
 
+    val activityContext = LocalContext.current as ComponentActivity
+    LaunchedEffect(Unit) {
+        activityContext.enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+        )
+    }
+
     Box(modifier.fillMaxSize()) {
         CameraPreview(
             context = context,
@@ -106,10 +116,12 @@ internal fun CameraPreviewScreen(
             onClick = {
                 if (state.value.isAnalyzing) {
                     viewModel.dispatch(CameraFeedIntent.OnStopAnalysis)
+                    // Stop analyzing frames from camera
                     imageAnalysis.clearAnalyzer()
                 } else {
                     if (isCameraSetup.value) {
                         viewModel.dispatch(CameraFeedIntent.OnStartAnalysis)
+                        // Start analyzing frames
                         imageAnalysis.setAnalyzer(
                             ContextCompat.getMainExecutor(context),
                             analyzer
