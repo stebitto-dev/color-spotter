@@ -35,6 +35,9 @@ internal class CameraFeedViewModel(
         viewModelScope.launch {
             when (intent) {
                 is CameraFeedIntent.OnFrameAnalyze -> onFrameAnalyze(intent.bitmap, intent.targetRadius)
+                CameraFeedIntent.OnStartAnalysis -> _state.update { state -> state.copy(isAnalyzing = true) }
+                CameraFeedIntent.OnStopAnalysis -> _state.update { state -> state.copy(isAnalyzing = false) }
+                CameraFeedIntent.OnCameraNotReady -> _sideEffects.send(CameraFeedEffect.ShowToastCameraNotReady)
             }
         }
     }
