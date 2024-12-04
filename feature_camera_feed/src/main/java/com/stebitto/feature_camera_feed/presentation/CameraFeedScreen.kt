@@ -13,7 +13,7 @@ fun CameraFeedScreen() {
     val cameraFeedViewModel = koinViewModel<CameraFeedViewModel>()
 
     if (permissionState.hasPermission) {
-        CameraPreview(viewModel = cameraFeedViewModel)
+        CameraPreviewScreen(viewModel = cameraFeedViewModel)
     } else {
         CameraPermission { permissionState.launchPermissionRequest() }
     }

@@ -1,10 +1,12 @@
 package com.stebitto.feature_camera_feed.presentation
 
+import android.content.Context
 import android.content.res.Configuration
 import android.util.Size
 import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageAnalysis.Analyzer
 import androidx.camera.core.ImageCapture
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -54,18 +56,14 @@ import com.stebitto.feature_camera_feed.TARGET_RADIUS
 import androidx.camera.core.Preview as CameraPreview
 
 @Composable
-internal fun CameraPreview(
+internal fun CameraPreviewScreen(
     modifier: Modifier = Modifier,
     viewModel: CameraFeedViewModel
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-
     val isCameraSetup = remember { mutableStateOf(false) }
-    val preview = remember { CameraPreview.Builder().build() }
-    val imageCapture = remember { ImageCapture.Builder().build() }
     val imageAnalysis = remember {
         ImageAnalysis.Builder()
             .setTargetResolution(Size(1280, 720))
@@ -73,35 +71,9 @@ internal fun CameraPreview(
             .build()
     }
 
-    val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
-    var cameraProvider by remember { mutableStateOf<ProcessCameraProvider?>(null) }
-    var previewView by remember { mutableStateOf<PreviewView?>(null) }
-
-    val analyzer = ImageAnalysis.Analyzer { imageProxy ->
+    val analyzer = Analyzer { imageProxy ->
         viewModel.dispatch(CameraFeedIntent.OnFrameAnalyze(imageProxy.toBitmap(), TARGET_RADIUS))
         imageProxy.close()
-    }
-
-    LaunchedEffect(cameraProviderFuture) {
-        val provider = cameraProviderFuture.get()
-        cameraProvider = provider
-
-        provider?.let {
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-            previewView?.let { previewView ->
-                preview.surfaceProvider = previewView.surfaceProvider
-                it.unbindAll()
-                it.bindToLifecycle(
-                    lifecycleOwner,
-                    cameraSelector,
-                    preview,
-                    imageCapture,
-                    imageAnalysis
-                )
-                // Ready for image analysis
-                isCameraSetup.value = true
-            }
-        }
     }
 
     LaunchedEffect(Unit) {
@@ -115,11 +87,10 @@ internal fun CameraPreview(
     }
 
     Box(modifier.fillMaxSize()) {
-        AndroidView(
-            modifier = Modifier.fillMaxSize(),
-            factory = { currentContext ->
-                PreviewView(currentContext).also { previewView = it }
-            }
+        CameraPreview(
+            context = context,
+            imageAnalysis = imageAnalysis,
+            onCameraReady = { isCameraSetup.value = true }
         )
 
         CircleHoleOverlay()
@@ -150,6 +121,50 @@ internal fun CameraPreview(
             }
         )
     }
+}
+
+@Composable
+internal fun CameraPreview(
+    context: Context,
+    imageAnalysis: ImageAnalysis,
+    onCameraReady: () -> Unit = {}
+) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val preview = remember { CameraPreview.Builder().build() }
+    val imageCapture = remember { ImageCapture.Builder().build() }
+
+    val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
+    var cameraProvider by remember { mutableStateOf<ProcessCameraProvider?>(null) }
+    var previewView by remember { mutableStateOf<PreviewView?>(null) }
+
+    LaunchedEffect(cameraProviderFuture) {
+        val provider = cameraProviderFuture.get()
+        cameraProvider = provider
+
+        provider?.let {
+            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+            previewView?.let { previewView ->
+                preview.surfaceProvider = previewView.surfaceProvider
+                it.unbindAll()
+                it.bindToLifecycle(
+                    lifecycleOwner,
+                    cameraSelector,
+                    preview,
+                    imageCapture,
+                    imageAnalysis
+                )
+                // Ready for image analysis
+                onCameraReady()
+            }
+        }
+    }
+
+    AndroidView(
+        modifier = Modifier.fillMaxSize(),
+        factory = { currentContext ->
+            PreviewView(currentContext).also { previewView = it }
+        }
+    )
 }
 
 @Composable
