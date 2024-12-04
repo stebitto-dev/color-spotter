@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jetbrains.annotations.VisibleForTesting
 
 internal class GetTargetAreaColorUseCaseImpl(
     private val colorNameRepository: ColorNameRepository
@@ -43,7 +44,8 @@ internal class GetTargetAreaColorUseCaseImpl(
         )
     }
 
-    private fun isPixelInCircle(
+    @VisibleForTesting
+    internal fun isPixelInCircle(
         x: Float,
         y: Float,
         centerX: Float,
