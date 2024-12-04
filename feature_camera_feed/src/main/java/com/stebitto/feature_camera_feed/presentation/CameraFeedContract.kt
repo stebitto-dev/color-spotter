@@ -1,15 +1,19 @@
 package com.stebitto.feature_camera_feed.presentation
 
 import android.graphics.Bitmap
-import androidx.compose.ui.graphics.Color
 import com.stebitto.common.Effect
 import com.stebitto.common.Intent
 import com.stebitto.common.State
 
 internal data class CameraFeedState(
     val isAnalyzing: Boolean = false,
+    val colorInt: Int? = null,
     val colorName: String = "",
-    val colorRgb: Color = Color.Gray
+    val colorHex: String = "",
+    val colorRed: Int = -1,
+    val colorGreen: Int = -1,
+    val colorBlue: Int = -1,
+    val colorLuminance: Float = -1f
 ) : State
 
 internal sealed class CameraFeedIntent : Intent {

@@ -40,9 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -57,6 +55,7 @@ import com.stebitto.common.theme.Typography
 import com.stebitto.feature_camera_feed.R
 import com.stebitto.feature_camera_feed.TARGET_RADIUS
 import androidx.camera.core.Preview as CameraPreview
+import androidx.compose.ui.graphics.Color as ComposeColor
 
 @Composable
 internal fun CameraPreviewScreen(
@@ -105,14 +104,21 @@ internal fun CameraPreviewScreen(
 
         CircleHoleOverlay()
 
+        val color = state.value.colorInt?.let { ComposeColor(it) } ?: ComposeColor.Gray
         ColorNameBox(
-            color = state.value.colorRgb,
-            colorName = state.value.colorName
+            color = color,
+            colorName = state.value.colorName,
+            colorHex = state.value.colorHex,
+            colorRed = state.value.colorRed,
+            colorGreen = state.value.colorGreen,
+            colorBlue = state.value.colorBlue,
+            colorLuminance = state.value.colorLuminance
         )
 
         ToggleFrameAnalyzeButton(
             isAnalyzing = state.value.isAnalyzing,
-            color = state.value.colorRgb,
+            color = color,
+            colorLuminance = state.value.colorLuminance,
             onClick = {
                 if (state.value.isAnalyzing) {
                     viewModel.dispatch(CameraFeedIntent.OnStopAnalysis)
@@ -188,16 +194,16 @@ internal fun CircleHoleOverlay(
     Box(modifier = modifier.fillMaxSize()) {
         Canvas(modifier = modifier.fillMaxSize()) {
             // Semi transparent overlay
-            drawRect(color = Color.Black.copy(alpha = 0.8f))
+            drawRect(color = ComposeColor.Black.copy(alpha = 0.8f))
             // Stroke
             drawCircle(
-                color = Color.White,
+                color = ComposeColor.White,
                 radius = radius + borderWidth.toPx() / 2,
                 style = Stroke(width = borderWidth.toPx())
             )
             // Target area
             drawCircle(
-                color = Color.Transparent,
+                color = ComposeColor.Transparent,
                 radius = radius,
                 blendMode = BlendMode.Clear
             )
@@ -216,23 +222,43 @@ internal fun CircleHoleOverlayPreview() {
 @Composable
 internal fun BoxScope.ColorNameBox(
     modifier: Modifier = Modifier,
-    color: Color,
-    colorName: String
+    color: ComposeColor,
+    colorName: String,
+    colorHex: String,
+    colorRed: Int,
+    colorGreen: Int,
+    colorBlue: Int,
+    colorLuminance: Float
 ) {
-    Box(
+    Column(
         modifier = modifier
             .safeContentPadding()
             .align(Alignment.TopCenter)
-            .height(100.dp)
+            .height(170.dp)
             .fillMaxWidth(0.8f)
             .background(color = color),
-        contentAlignment = Alignment.Center
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = colorName,
-            color = if (color.luminance() < 0.5) Color.White else Color.Black,
+            color = if (colorLuminance < 0.5) ComposeColor.White else ComposeColor.Black,
             style = Typography.headlineMedium
         )
+        if (colorHex.isNotBlank()) {
+            Text(
+                text = "#${colorHex.uppercase()}",
+                color = if (colorLuminance < 0.5) ComposeColor.White else ComposeColor.Black,
+                style = Typography.headlineSmall
+            )
+        }
+        if (colorRed >= 0 && colorGreen >= 0 && colorBlue >= 0) {
+            Text(
+                text = "$colorRed, $colorGreen, $colorBlue",
+                color = if (colorLuminance < 0.5) ComposeColor.White else ComposeColor.Black,
+                style = Typography.headlineSmall
+            )
+        }
     }
 }
 
@@ -242,8 +268,13 @@ internal fun ColorNameBoxPreview() {
     MyApplicationTheme {
         Box(modifier = Modifier.fillMaxWidth()) {
             ColorNameBox(
-                color = Color.Gray,
-                colorName = "Color name"
+                color = ComposeColor.Gray,
+                colorName = "Color name",
+                colorHex = "000000",
+                colorRed = 0,
+                colorGreen = 0,
+                colorBlue = 0,
+                colorLuminance = 0.4f
             )
         }
     }
@@ -253,7 +284,8 @@ internal fun ColorNameBoxPreview() {
 internal fun BoxScope.ToggleFrameAnalyzeButton(
     modifier: Modifier = Modifier,
     isAnalyzing: Boolean,
-    color: Color,
+    color: ComposeColor,
+    colorLuminance: Float,
     onClick: () -> Unit = {}
 ) {
     Button(
@@ -268,7 +300,7 @@ internal fun BoxScope.ToggleFrameAnalyzeButton(
     ) {
         Text(
             text = (if (isAnalyzing) stringResource(R.string.stop_text) else stringResource(R.string.start_text)).uppercase(),
-            color = if (color.luminance() < 0.5) Color.White else Color.Black,
+            color = if (colorLuminance < 0.5) ComposeColor.White else ComposeColor.Black,
             style = Typography.headlineSmall
         )
     }
@@ -281,7 +313,8 @@ internal fun ToggleFrameAnalyzeButtonPreview() {
         Box(modifier = Modifier.fillMaxWidth()) {
             ToggleFrameAnalyzeButton(
                 isAnalyzing = true,
-                color = Color.Gray
+                color = ComposeColor.Gray,
+                colorLuminance = 0.4f
             )
         }
     }

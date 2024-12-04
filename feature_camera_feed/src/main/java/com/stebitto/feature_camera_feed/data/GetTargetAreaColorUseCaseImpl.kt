@@ -1,7 +1,7 @@
 package com.stebitto.feature_camera_feed.data
 
 import android.graphics.Bitmap
-import androidx.compose.ui.graphics.Color
+import android.graphics.Color
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.VisibleForTesting
@@ -10,7 +10,7 @@ internal class GetTargetAreaColorUseCaseImpl(
     private val colorNameRepository: ColorNameRepository
 ) : GetTargetAreaColorUseCase {
 
-    override suspend fun invoke(bitmap: Bitmap, targetRadius: Float): Result<Pair<Color, String>> = runCatching {
+    override suspend fun invoke(bitmap: Bitmap, targetRadius: Float): Result<Pair<Int, String>> = runCatching {
         return Result.success(
             withContext(Dispatchers.IO) {
                 val xCoordinate = bitmap.width / 2f
@@ -24,11 +24,11 @@ internal class GetTargetAreaColorUseCaseImpl(
                     for (y in (yCoordinate - targetRadius).toInt() until (yCoordinate + targetRadius).toInt()) {
                         val point = bitmap.getPixel(x, y)
                         if (isPixelInCircle(x.toFloat(), y.toFloat(), xCoordinate, yCoordinate, targetRadius)) {
-                            val red = android.graphics.Color.red(point)
+                            val red = Color.red(point)
                             redsList.add(red)
-                            val green = android.graphics.Color.green(point)
+                            val green = Color.green(point)
                             greensList.add(green)
-                            val blue = android.graphics.Color.blue(point)
+                            val blue = Color.blue(point)
                             bluesList.add(blue)
                         }
                     }
@@ -38,7 +38,7 @@ internal class GetTargetAreaColorUseCaseImpl(
                 val greenAverage = greensList.average()
                 val blueAverage = bluesList.average()
 
-                val color = Color(redAverage.toInt(), greenAverage.toInt(), blueAverage.toInt())
+                val color = Color.rgb(redAverage.toInt(), greenAverage.toInt(), blueAverage.toInt())
                 color to colorNameRepository.getColorName(redAverage, greenAverage, blueAverage).getOrThrow()
             }
         )

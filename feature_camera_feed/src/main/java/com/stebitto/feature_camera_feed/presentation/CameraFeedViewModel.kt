@@ -1,14 +1,13 @@
 package com.stebitto.feature_camera_feed.presentation
 
 import android.graphics.Bitmap
-import androidx.compose.ui.graphics.Color
+import android.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stebitto.common.MVIViewModel
 import com.stebitto.common.stateInWhileSubscribed
 import com.stebitto.feature_camera_feed.CAPTURE_ANALYSIS_INTERVAL
 import com.stebitto.feature_camera_feed.data.GetTargetAreaColorUseCase
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.Date
 
 internal class CameraFeedViewModel(
@@ -48,9 +46,31 @@ internal class CameraFeedViewModel(
         lastSeen = Date()
 
         getTargetAreaColorUseCase(bitmap, targetRadius)
-            .onFailure { _state.update { state -> state.copy(colorName = "ERROR", colorRgb = Color.Red) } }
+            .onFailure {
+                _state.update { state ->
+                    state.copy(
+                        colorInt = null,
+                        colorName = "ERROR",
+                        colorHex = "",
+                        colorRed = -1,
+                        colorGreen = -1,
+                        colorBlue = -1,
+                        colorLuminance = -1f
+                    )
+                }
+            }
             .onSuccess { (color, colorName) ->
-                _state.update { state -> state.copy(colorName = colorName, colorRgb = color) }
+                _state.update { state ->
+                    state.copy(
+                        colorInt = color,
+                        colorName = colorName,
+                        colorHex = Integer.toHexString(color).substring(2),
+                        colorRed = Color.red(color),
+                        colorGreen = Color.green(color),
+                        colorBlue = Color.blue(color),
+                        colorLuminance = Color.luminance(color)
+                    )
+                }
             }
     }
 }
