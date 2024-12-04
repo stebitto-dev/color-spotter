@@ -7,6 +7,7 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 appcompat = "1.7.0"
 material = "1.12.0"
+coroutineTestVersion = "1.9.0"
 composeBomVersion = "2024.11.00"
 composeActivityVersion = "1.9.3"
 composeNavigationVerson = "2.8.4"
@@ -17,6 +18,8 @@ cameraVersion = "1.4.0"
 permissionVersion = "0.23.1"
 retrofitVersion = "2.11.0"
 retrofitLoggingVersion = "4.12.0"
+mockitoCoreVersion = "4.8.0"
+mockitoKotlinVersion = "4.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -25,6 +28,8 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+
+kotlin-coroutine-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutineTestVersion" }
 
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBomVersion" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
@@ -50,6 +55,9 @@ permission-accompanist = { group = "com.google.accompanist", name = "accompanist
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofitVersion" }
 retrofit-gson-converter = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofitVersion" }
 retrofit-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "retrofitLoggingVersion" }
+
+mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockitoCoreVersion" }
+mockito-kolin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlinVersion"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
