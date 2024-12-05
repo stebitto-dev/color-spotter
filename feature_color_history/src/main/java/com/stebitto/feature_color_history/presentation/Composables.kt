@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,6 +44,10 @@ import com.stebitto.common.theme.MyApplicationTheme
 import com.stebitto.common.theme.Typography
 import com.stebitto.feature_color_history.R
 import com.stebitto.feature_color_history.models.ColorPresentationModel
+
+internal const val TEST_COLOR_LIST = "test_color_list"
+internal const val TEST_EMPTY_LIST = "test_empty_list"
+internal const val TEST_ERROR_MESSAGE = "test_error_message"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,20 +109,23 @@ internal fun ColorList(
     sortAlphabetically: Boolean,
     colorItems: List<ColorPresentationModel>,
     errorMessage: String? = null,
-    onDelete: (ColorPresentationModel) -> Unit
+    onDelete: (ColorPresentationModel) -> Unit = {}
 ) {
     when {
         errorMessage != null -> {
             Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxSize()) {
-                ErrorMessage(errorMessage = errorMessage)
+                ErrorMessage(
+                    modifier = modifier.testTag(TEST_ERROR_MESSAGE),
+                    errorMessage = errorMessage
+                )
             }
         }
         colorItems.isEmpty() -> {
             Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxSize()) {
-                EmptyListMessage()
+                EmptyListMessage(modifier = modifier.testTag(TEST_EMPTY_LIST))
             }
         }
-        else -> LazyColumn(modifier = modifier) {
+        else -> LazyColumn(modifier = modifier.testTag(TEST_COLOR_LIST)) {
             items(
                 if (sortAlphabetically) colorItems.sortedBy { it.name } else colorItems,
                 key = { it.id }
