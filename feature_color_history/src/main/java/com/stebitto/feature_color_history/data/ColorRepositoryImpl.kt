@@ -19,7 +19,7 @@ internal class ColorRepositoryImpl(
         colorLocalSource.insertColor(color.toColorEntity())
     }
 
-    override suspend fun deleteColor(color: ColorDTO) {
-        colorLocalSource.deleteColor(color.toColorEntity())
+    override suspend fun deleteColor(id: Int) {
+        colorLocalSource.deleteColor(id)
     }
 }

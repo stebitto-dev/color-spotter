@@ -15,7 +15,7 @@ internal class ColorLocalSourceImpl(
         colorDao.insertColor(color)
     }
 
-    override suspend fun deleteColor(color: ColorEntity) {
-        colorDao.deleteColor(color)
+    override suspend fun deleteColor(id: Int) {
+        colorDao.deleteColorById(id)
     }
 }

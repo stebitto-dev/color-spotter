@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 internal interface ColorLocalSource {
     fun getAllColors(): Flow<List<ColorEntity>>
     suspend fun insertColor(color: ColorEntity)
-    suspend fun deleteColor(color: ColorEntity)
+    suspend fun deleteColor(id: Int)
 }

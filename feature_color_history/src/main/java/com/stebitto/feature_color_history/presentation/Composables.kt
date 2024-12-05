@@ -2,7 +2,6 @@ package com.stebitto.feature_color_history.presentation
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -37,11 +37,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.stebitto.common.formatTimestamp
 import com.stebitto.common.theme.MyApplicationTheme
 import com.stebitto.common.theme.Typography
 import com.stebitto.feature_color_history.R
 import com.stebitto.feature_color_history.models.ColorPresentationModel
-import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,7 +77,12 @@ internal fun ColorHistoryScreen(
             )
         },
     ) { padding ->
-        ColorList(modifier = modifier.padding(padding), colorItems = state.value.colors)
+        ColorList(
+            modifier = modifier.padding(padding),
+            colorItems = state.value.colors,
+            errorMessage = state.value.errorMessage,
+            onDelete = { viewModel.dispatch(ColorHistoryIntent.OnDeleteColor(it)) }
+        )
     }
 }
 
@@ -85,7 +90,8 @@ internal fun ColorHistoryScreen(
 internal fun ColorList(
     modifier: Modifier = Modifier,
     colorItems: List<ColorPresentationModel>,
-    errorMessage: String? = null
+    errorMessage: String? = null,
+    onDelete: (ColorPresentationModel) -> Unit
 ) {
     when {
         errorMessage != null -> {
@@ -100,14 +106,20 @@ internal fun ColorList(
         }
         else -> LazyColumn(modifier = modifier) {
             items(colorItems, key = { it.id }) { colorItem ->
-                ColorItemCard(colorItem)
+                ColorItemCard(
+                    colorItem = colorItem,
+                    onDelete = { onDelete(colorItem) }
+                )
             }
         }
     }
 }
 
 @Composable
-internal fun ColorItemCard(colorItem: ColorPresentationModel) {
+internal fun ColorItemCard(
+    colorItem: ColorPresentationModel,
+    onDelete: () -> Unit = {}
+) {
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -119,8 +131,7 @@ internal fun ColorItemCard(colorItem: ColorPresentationModel) {
         shape = RoundedCornerShape(8.dp)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.Center
+            modifier = Modifier.padding(16.dp)
         ) {
             Box(
                 modifier = Modifier
@@ -130,13 +141,22 @@ internal fun ColorItemCard(colorItem: ColorPresentationModel) {
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = colorItem.name, fontWeight = FontWeight.Black)
-                Text(text = Date(colorItem.lastSeen).toString(), style = Typography.bodyMedium)
-                Text(text = "Hex: ${colorItem.hexCode}", style = Typography.bodyMedium)
-                Text(text = "RGB: (${colorItem.red}, ${colorItem.green}, ${colorItem.blue})", style = Typography.bodyMedium)
+                Row {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(text = colorItem.lastSeen.formatTimestamp(), style = Typography.bodyMedium)
+                        Text(text = "Hex: ${colorItem.hexCode}", style = Typography.bodyMedium)
+                        Text(text = "RGB: (${colorItem.red}, ${colorItem.green}, ${colorItem.blue})", style = Typography.bodyMedium)
+                    }
+                    IconButton(
+                        modifier = Modifier.align(Alignment.Bottom),
+                        onClick = { onDelete() }
+                    ) {
+                        Icon(imageVector = Icons.Filled.Delete, contentDescription = stringResource(R.string.delete_content_description))
+                    }
+                }
             }
         }
     }

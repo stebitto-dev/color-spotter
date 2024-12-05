@@ -40,7 +40,7 @@ internal class ColorHistoryViewModel(
                         }
                 }
                 is ColorHistoryIntent.OnDeleteColor -> {
-                    colorRepository.deleteColor(intent.color.toColorDTO())
+                    colorRepository.deleteColor(intent.color.id)
                 }
             }
         }

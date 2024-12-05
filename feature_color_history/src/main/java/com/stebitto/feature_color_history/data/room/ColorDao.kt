@@ -1,7 +1,6 @@
 package com.stebitto.feature_color_history.data.room
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.stebitto.feature_color_history.models.ColorEntity
@@ -16,6 +15,6 @@ internal interface ColorDao {
     @Insert
     suspend fun insertColor(color: ColorEntity)
 
-    @Delete
-    suspend fun deleteColor(color: ColorEntity)
+    @Query("DELETE FROM colors WHERE id = :id")
+    suspend fun deleteColorById(id: Int)
 }
