@@ -34,10 +34,9 @@ internal class ColorHistoryViewModel(
                 is ColorHistoryIntent.LoadColors -> {
                     colorRepository.getAllColors()
                         .map { colorListDTO -> colorListDTO.map { it.toColorPresentationModel() } }
-                        .catch { _state.value = _state.value.copy(colors = emptyList()) }
+                        .catch { throwable -> _state.update { it.copy(errorMessage = throwable.message) } }
                         .collect { colorListPresentationModel ->
-                            _state.value =
-                                _state.value.copy(colors = colorListPresentationModel)
+                            _state.update { it.copy(colors = colorListPresentationModel) }
                         }
                 }
                 is ColorHistoryIntent.OnSortColors -> {
