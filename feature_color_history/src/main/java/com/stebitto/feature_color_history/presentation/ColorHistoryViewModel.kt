@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 internal class ColorHistoryViewModel(
@@ -38,6 +39,9 @@ internal class ColorHistoryViewModel(
                             _state.value =
                                 _state.value.copy(colors = colorListPresentationModel)
                         }
+                }
+                is ColorHistoryIntent.OnSortColors -> {
+                    _state.update { it.copy(sortAlphabetically = true) }
                 }
                 is ColorHistoryIntent.OnDeleteColor -> {
                     colorRepository.deleteColor(intent.color.id)

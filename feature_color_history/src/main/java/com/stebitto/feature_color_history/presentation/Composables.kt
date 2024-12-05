@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -74,11 +75,22 @@ internal fun ColorHistoryScreen(
                         )
                     }
                 },
+                actions = {
+                    IconButton(
+                        onClick = { viewModel.dispatch(ColorHistoryIntent.OnSortColors) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.SortByAlpha,
+                            contentDescription = stringResource(R.string.sort_alphabetically_content_description)
+                        )
+                    }
+                }
             )
         },
     ) { padding ->
         ColorList(
             modifier = modifier.padding(padding),
+            sortAlphabetically = state.value.sortAlphabetically,
             colorItems = state.value.colors,
             errorMessage = state.value.errorMessage,
             onDelete = { viewModel.dispatch(ColorHistoryIntent.OnDeleteColor(it)) }
@@ -89,6 +101,7 @@ internal fun ColorHistoryScreen(
 @Composable
 internal fun ColorList(
     modifier: Modifier = Modifier,
+    sortAlphabetically: Boolean,
     colorItems: List<ColorPresentationModel>,
     errorMessage: String? = null,
     onDelete: (ColorPresentationModel) -> Unit
@@ -105,7 +118,10 @@ internal fun ColorList(
             }
         }
         else -> LazyColumn(modifier = modifier) {
-            items(colorItems, key = { it.id }) { colorItem ->
+            items(
+                if (sortAlphabetically) colorItems.sortedBy { it.name } else colorItems,
+                key = { it.id }
+            ) { colorItem ->
                 ColorItemCard(
                     colorItem = colorItem,
                     onDelete = { onDelete(colorItem) }
