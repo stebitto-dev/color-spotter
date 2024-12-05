@@ -15,9 +15,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,10 +43,12 @@ import com.stebitto.feature_color_history.R
 import com.stebitto.feature_color_history.models.ColorPresentationModel
 import java.util.Date
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun ColorHistory(
+internal fun ColorHistoryScreen(
     modifier: Modifier = Modifier,
-    viewModel: ColorHistoryViewModel
+    viewModel: ColorHistoryViewModel,
+    onNavigateBack: () -> Unit = {}
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
 
@@ -47,11 +56,33 @@ internal fun ColorHistory(
         viewModel.dispatch(ColorHistoryIntent.LoadColors)
     }
 
-    ColorListScreen(colorItems = state.value.colors)
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(R.string.acquired_screen_title),
+                        style = Typography.headlineMedium,
+                        fontWeight = FontWeight.Black
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.navigate_back_content_description)
+                        )
+                    }
+                },
+            )
+        },
+    ) { padding ->
+        ColorList(modifier = modifier.padding(padding), colorItems = state.value.colors)
+    }
 }
 
 @Composable
-internal fun ColorListScreen(
+internal fun ColorList(
     modifier: Modifier = Modifier,
     colorItems: List<ColorPresentationModel>,
     errorMessage: String? = null
@@ -67,7 +98,7 @@ internal fun ColorListScreen(
                 EmptyListMessage()
             }
         }
-        else -> LazyColumn {
+        else -> LazyColumn(modifier = modifier) {
             items(colorItems, key = { it.id }) { colorItem ->
                 ColorItemCard(colorItem)
             }

@@ -31,7 +31,11 @@ class MainActivity : ComponentActivity() {
                             navController.navigate(ColorHistoryRoutes.COLOR_HISTORY.name)
                         }
                     )
-                    colorHistoryNavGraph()
+                    colorHistoryNavGraph(
+                        onNavigateBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
             }
         }

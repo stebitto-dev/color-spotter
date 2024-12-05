@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 internal interface ColorDao {
 
-    @Query("SELECT * FROM colors")
+    @Query("SELECT * FROM colors ORDER BY lastSeen DESC")
     fun getAllColors(): Flow<List<ColorEntity>>
 
     @Insert

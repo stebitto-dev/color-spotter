@@ -2,6 +2,7 @@ package com.stebitto.feature_camera_feed.presentation
 
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Color as GraphicsColor
 import android.util.Size
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -37,6 +38,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -108,10 +110,16 @@ internal fun CameraPreviewScreen(
     }
 
     val activityContext = LocalContext.current as ComponentActivity
-    LaunchedEffect(Unit) {
+    DisposableEffect(Unit) {
         activityContext.enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+            statusBarStyle = SystemBarStyle.dark(GraphicsColor.TRANSPARENT)
         )
+
+        onDispose {
+            activityContext.enableEdgeToEdge(
+                statusBarStyle = SystemBarStyle.auto(GraphicsColor.TRANSPARENT, GraphicsColor.TRANSPARENT)
+            )
+        }
     }
 
     Box(modifier.fillMaxSize()) {
