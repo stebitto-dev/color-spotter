@@ -23,8 +23,8 @@ val networkModule = module {
     single { provideService(get()) }
 }
 
-val cameraFeedModule = module {
-    viewModel { CameraFeedViewModel(get()) }
+val featureCameraFeedModule = module {
+    viewModel { CameraFeedViewModel(get(), get()) }
     factory<GetTargetAreaColorUseCase> { GetTargetAreaColorUseCaseImpl(get()) }
     factory<ColorNameRepository> { ColorNameRepositoryImpl(get()) }
     factory<ColorNameRemoteSource> { ColorNameRemoteSourceImpl(get()) }

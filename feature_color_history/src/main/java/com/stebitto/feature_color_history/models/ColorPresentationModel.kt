@@ -1,12 +1,9 @@
 package com.stebitto.feature_color_history.models
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import com.stebitto.common.data.ColorDTO
 
-@Entity(tableName = "colors")
-internal data class ColorEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+internal data class ColorPresentationModel(
+    val id: Int,
     val name: String,
     val lastSeen: Long,
     val hexCode: String,
@@ -27,8 +24,9 @@ internal data class ColorEntity(
     }
 }
 
-internal fun ColorDTO.toColorEntity(): ColorEntity {
-    return ColorEntity(
+internal fun ColorDTO.toColorPresentationModel(): ColorPresentationModel {
+    return ColorPresentationModel(
+        id = id,
         name = name,
         lastSeen = lastSeen,
         hexCode = hexCode,

@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.compose.navigation)
     implementation(libs.compose.activity)
     implementation(libs.compose.preview)
+    implementation(libs.compose.icons.extended)
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.test.manifest)
     androidTestImplementation platform(libs.compose.bom)

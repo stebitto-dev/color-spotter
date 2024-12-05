@@ -5,6 +5,8 @@ import android.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stebitto.common.MVIViewModel
+import com.stebitto.common.data.ColorDTO
+import com.stebitto.common.data.ColorRepository
 import com.stebitto.common.stateInWhileSubscribed
 import com.stebitto.feature_camera_feed.CAPTURE_ANALYSIS_INTERVAL
 import com.stebitto.feature_camera_feed.data.GetTargetAreaColorUseCase
@@ -19,6 +21,7 @@ import java.util.Date
 
 internal class CameraFeedViewModel(
     private val getTargetAreaColorUseCase: GetTargetAreaColorUseCase,
+    private val colorRepository: ColorRepository,
     initialState: CameraFeedState = CameraFeedState()
 ) : ViewModel(), MVIViewModel<CameraFeedState, CameraFeedIntent, CameraFeedEffect> {
 
@@ -33,9 +36,10 @@ internal class CameraFeedViewModel(
         viewModelScope.launch {
             when (intent) {
                 is CameraFeedIntent.OnFrameAnalyze -> onFrameAnalyze(intent.bitmap, intent.targetRadius)
-                CameraFeedIntent.OnStartAnalysis -> _state.update { state -> state.copy(isAnalyzing = true) }
-                CameraFeedIntent.OnStopAnalysis -> _state.update { state -> state.copy(isAnalyzing = false) }
+                CameraFeedIntent.OnStartAnalysis -> onStartAnalysis()
+                CameraFeedIntent.OnStopAnalysis -> onStopAnalysis()
                 CameraFeedIntent.OnCameraNotReady -> _sideEffects.send(CameraFeedEffect.ShowToastCameraNotReady)
+                CameraFeedIntent.OnGoToColorHistory -> onGoToColorHistory()
             }
         }
     }
@@ -60,6 +64,16 @@ internal class CameraFeedViewModel(
                 }
             }
             .onSuccess { (color, colorName) ->
+                colorRepository.insertColor(
+                    ColorDTO(
+                        name = colorName,
+                        lastSeen = Date().time,
+                        hexCode = Integer.toHexString(color).substring(2),
+                        red = Color.red(color),
+                        green = Color.green(color),
+                        blue = Color.blue(color)
+                    )
+                )
                 _state.update { state ->
                     state.copy(
                         colorInt = color,
@@ -72,5 +86,20 @@ internal class CameraFeedViewModel(
                     )
                 }
             }
+    }
+
+    private suspend fun onStartAnalysis() {
+        _sideEffects.send(CameraFeedEffect.StartFrameAnalysis)
+        _state.update { state -> state.copy(isAnalyzing = true) }
+    }
+
+    private suspend fun onStopAnalysis() {
+        _sideEffects.send(CameraFeedEffect.StopFrameAnalysis)
+        _state.update { state -> state.copy(isAnalyzing = false) }
+    }
+
+    private suspend fun onGoToColorHistory() {
+        _sideEffects.send(CameraFeedEffect.GoToColorHistory)
+        _state.update { state -> state.copy(isAnalyzing = false) }
     }
 }

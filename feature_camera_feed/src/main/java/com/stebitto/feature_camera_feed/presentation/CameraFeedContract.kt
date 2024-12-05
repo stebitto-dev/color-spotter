@@ -21,8 +21,12 @@ internal sealed class CameraFeedIntent : Intent {
     data object OnStopAnalysis : CameraFeedIntent()
     data class OnFrameAnalyze(val bitmap: Bitmap, val targetRadius: Float) : CameraFeedIntent()
     data object OnCameraNotReady : CameraFeedIntent()
+    data object OnGoToColorHistory : CameraFeedIntent()
 }
 
 internal sealed class CameraFeedEffect : Effect {
+    data object StartFrameAnalysis : CameraFeedEffect()
+    data object StopFrameAnalysis : CameraFeedEffect()
     data object ShowToastCameraNotReady : CameraFeedEffect()
+    data object GoToColorHistory : CameraFeedEffect()
 }

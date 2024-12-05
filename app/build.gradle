@@ -41,6 +41,7 @@ dependencies {
     implementation project(":navigation")
     implementation project(":common")
     implementation project(":feature_camera_feed")
+    implementation project(":feature_color_history")
 
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat

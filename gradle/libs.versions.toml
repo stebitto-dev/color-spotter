@@ -41,6 +41,7 @@ compose-activity = { group = "androidx.activity", name = "activity-compose", ver
 compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "composeNavigationVerson" }
 compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "composeUiToolingVersion" }
 compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+compose-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koinBomVersion" }
 koin-android = { module = "io.insert-koin:koin-android" }
