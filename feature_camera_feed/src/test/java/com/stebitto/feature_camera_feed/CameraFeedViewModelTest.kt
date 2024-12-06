@@ -105,54 +105,46 @@ class CameraFeedViewModelTest {
     }
 
     @Test
-    fun `on dispatch OnStartAnalysis intent, update state with isAnalyzing set to true and send StartFrameAnalysis side effect`() = runTest {
+    fun `on dispatch OnStartAnalysis intent, update state with isAnalyzing set to true`() = runTest {
         val expectedState = CameraFeedState(isAnalyzing = true)
 
-        turbineScope {
-            val sideEffects = viewModel.sideEffects.testIn(backgroundScope)
-            val state = viewModel.state.testIn(backgroundScope)
-            state.awaitItem() // initial state
-
+        viewModel.state.test {
+            awaitItem() // initial state
             viewModel.dispatch(CameraFeedIntent.OnStartAnalysis)
-            assertEquals(state.awaitItem(), expectedState)
-            assertEquals(sideEffects.awaitItem(), CameraFeedEffect.StartFrameAnalysis)
+            assertEquals(awaitItem(), expectedState)
         }
     }
 
     @Test
-    fun `on dispatch OnStopAnalysis intent, update state with isAnalyzing set to false and send StopFrameAnalysis side effect`() = runTest {
+    fun `on dispatch OnStopAnalysis intent, update state with isAnalyzing set to false`() = runTest {
         // setup viewModel with active analyzing state
         val initialState = CameraFeedState(isAnalyzing = true)
         viewModel = CameraFeedViewModel(getTargetAreaColorUseCase, timerIntervalUseCase, colorRepository, initialState)
 
         val expectedState = CameraFeedState(isAnalyzing = false)
 
+        viewModel.state.test {
+            awaitItem() // initial state
+            viewModel.dispatch(CameraFeedIntent.OnStopAnalysis)
+            assertEquals(awaitItem(), expectedState)
+        }
+    }
+
+    @Test
+    fun `on dispatch OnGoToColorHistory intent, update state with isAnalyzing set to false and send GoToColorHistory side effect`() = runTest {
+        val initialState = CameraFeedState(isAnalyzing = true)
+        val expectedSideEffect = CameraFeedEffect.GoToColorHistory
+        val expectedState = CameraFeedState(isAnalyzing = false)
+
+        viewModel = CameraFeedViewModel(getTargetAreaColorUseCase, timerIntervalUseCase, colorRepository, initialState)
+
         turbineScope {
-            val sideEffects = viewModel.sideEffects.testIn(backgroundScope)
+            val sideEffect = viewModel.sideEffects.testIn(backgroundScope)
             val state = viewModel.state.testIn(backgroundScope)
             state.awaitItem() // initial state
-
-            viewModel.dispatch(CameraFeedIntent.OnStopAnalysis)
-            assertEquals(state.awaitItem(), expectedState)
-            assertEquals(sideEffects.awaitItem(), CameraFeedEffect.StopFrameAnalysis)
-        }
-    }
-
-    @Test
-    fun `on dispatch OnCameraNotReady intent, send ShowToastCameraNotReady side effect`() = runTest {
-        val expectedSideEffect = CameraFeedEffect.ShowToastCameraNotReady
-        viewModel.sideEffects.test {
-            viewModel.dispatch(CameraFeedIntent.OnCameraNotReady)
-            assertEquals(awaitItem(), expectedSideEffect)
-        }
-    }
-
-    @Test
-    fun `on dispatch OnGoToColorHistory intent, send GoToColorHistory side effect`() = runTest {
-        val expectedSideEffect = CameraFeedEffect.GoToColorHistory
-        viewModel.sideEffects.test {
             viewModel.dispatch(CameraFeedIntent.OnGoToColorHistory)
-            assertEquals(awaitItem(), expectedSideEffect)
+            assertEquals(state.awaitItem(), expectedState)
+            assertEquals(sideEffect.awaitItem(), expectedSideEffect)
         }
     }
 }

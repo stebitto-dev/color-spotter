@@ -84,7 +84,6 @@ internal fun CameraPreviewScreen(
     val state = viewModel.state.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
-    val isCameraSetup = remember { mutableStateOf(false) }
     val imageAnalysis = remember {
         ImageAnalysis.Builder()
             .setTargetResolution(Size(1280, 720))
@@ -102,24 +101,23 @@ internal fun CameraPreviewScreen(
         imageProxy.close()
     }
 
+    LaunchedEffect(state.value.isAnalyzing) {
+        if (state.value.isAnalyzing) {
+            imageAnalysis.setAnalyzer(
+                ContextCompat.getMainExecutor(context),
+                analyzer
+            )
+        } else {
+            imageAnalysis.clearAnalyzer()
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.sideEffects.collect { effect ->
             when (effect) {
-                CameraFeedEffect.ShowToastCameraNotReady -> {
-                    Toast.makeText(context, R.string.camera_not_ready, Toast.LENGTH_SHORT).show()
-                }
                 CameraFeedEffect.GoToColorHistory -> {
                     imageAnalysis.clearAnalyzer()
                     onGoToColorHistoryClick()
-                }
-                CameraFeedEffect.StartFrameAnalysis -> {
-                    imageAnalysis.setAnalyzer(
-                        ContextCompat.getMainExecutor(context),
-                        analyzer
-                    )
-                }
-                CameraFeedEffect.StopFrameAnalysis -> {
-                    imageAnalysis.clearAnalyzer()
                 }
             }
         }
@@ -141,8 +139,7 @@ internal fun CameraPreviewScreen(
     Box(modifier.fillMaxSize()) {
         CameraPreview(
             context = context,
-            imageAnalysis = imageAnalysis,
-            onCameraReady = { isCameraSetup.value = true }
+            imageAnalysis = imageAnalysis
         )
 
         CircleHoleOverlay()
@@ -155,11 +152,7 @@ internal fun CameraPreviewScreen(
                 if (state.value.isAnalyzing) {
                     viewModel.dispatch(CameraFeedIntent.OnStopAnalysis)
                 } else {
-                    if (isCameraSetup.value) {
-                        viewModel.dispatch(CameraFeedIntent.OnStartAnalysis)
-                    } else {
-                        viewModel.dispatch(CameraFeedIntent.OnCameraNotReady)
-                    }
+                    viewModel.dispatch(CameraFeedIntent.OnStartAnalysis)
                 }
             },
             onGoToColorHistoryClick = {
@@ -172,8 +165,7 @@ internal fun CameraPreviewScreen(
 @Composable
 internal fun CameraPreview(
     context: Context,
-    imageAnalysis: ImageAnalysis,
-    onCameraReady: () -> Unit = {}
+    imageAnalysis: ImageAnalysis
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val preview = remember { CameraPreview.Builder().build() }
@@ -199,8 +191,6 @@ internal fun CameraPreview(
                     imageCapture,
                     imageAnalysis
                 )
-                // Ready for image analysis
-                onCameraReady()
             }
         }
     }
@@ -271,7 +261,13 @@ internal fun BoxScope.ColorNameBox(
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(color = Color(colorItem.getRed(), colorItem.getGreen(), colorItem.getBlue()))
+                    .background(
+                        color = Color(
+                            colorItem.getRed(),
+                            colorItem.getGreen(),
+                            colorItem.getBlue()
+                        )
+                    )
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column(
