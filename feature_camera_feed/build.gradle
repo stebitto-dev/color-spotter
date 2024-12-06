@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.compose.navigation)
     implementation(libs.compose.activity)
     implementation(libs.compose.preview)
+    implementation(libs.compose.icons.extended)
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.test.manifest)
     androidTestImplementation platform(libs.compose.bom)
@@ -78,4 +79,7 @@ dependencies {
     // mockito
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kolin)
+
+    // turbine
+    testImplementation(libs.turbine)
 }

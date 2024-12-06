@@ -12,7 +12,6 @@ composeBomVersion = "2024.11.00"
 composeActivityVersion = "1.9.3"
 composeNavigationVerson = "2.8.4"
 composeUiToolingVersion = "1.7.5"
-composeSystemUIControllerVersion = "0.32.0"
 koinBomVersion = "3.5.6"
 cameraVersion = "1.4.0"
 permissionVersion = "0.23.1"
@@ -20,6 +19,9 @@ retrofitVersion = "2.11.0"
 retrofitLoggingVersion = "4.12.0"
 mockitoCoreVersion = "4.8.0"
 mockitoKotlinVersion = "4.0.0"
+roomVersion = "2.6.1"
+kspVersion = "2.0.21-1.0.25"
+turbineVersion = "1.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,6 +41,7 @@ compose-activity = { group = "androidx.activity", name = "activity-compose", ver
 compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "composeNavigationVerson" }
 compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "composeUiToolingVersion" }
 compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+compose-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koinBomVersion" }
 koin-android = { module = "io.insert-koin:koin-android" }
@@ -58,9 +61,16 @@ retrofit-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockitoCoreVersion" }
 mockito-kolin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlinVersion"}
 
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomVersion" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomVersion" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomVersion" }
+
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbineVersion" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "kspVersion" }
 

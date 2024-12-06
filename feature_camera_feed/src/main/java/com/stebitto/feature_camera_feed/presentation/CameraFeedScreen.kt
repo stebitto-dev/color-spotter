@@ -8,12 +8,14 @@ import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun CameraFeedScreen() {
+fun CameraFeedScreen(
+    onNavigateToColorHistory: () -> Unit
+) {
     val permissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val cameraFeedViewModel = koinViewModel<CameraFeedViewModel>()
 
     if (permissionState.hasPermission) {
-        CameraPreviewScreen(viewModel = cameraFeedViewModel)
+        CameraPreviewScreen(viewModel = cameraFeedViewModel, onGoToColorHistoryClick = onNavigateToColorHistory)
     } else {
         CameraPermission { permissionState.launchPermissionRequest() }
     }

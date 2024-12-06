@@ -1,13 +1,16 @@
 package com.stebitto.feature_camera_feed.presentation
 
-import android.graphics.Bitmap
-import android.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stebitto.common.MVIViewModel
+import com.stebitto.common.data.ColorDTO
+import com.stebitto.common.data.ColorRepository
 import com.stebitto.common.stateInWhileSubscribed
 import com.stebitto.feature_camera_feed.CAPTURE_ANALYSIS_INTERVAL
+import com.stebitto.feature_camera_feed.models.BitmapWrapper
 import com.stebitto.feature_camera_feed.data.GetTargetAreaColorUseCase
+import com.stebitto.feature_camera_feed.data.TimerIntervalUseCase
+import com.stebitto.feature_camera_feed.models.ColorPresentationModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +22,8 @@ import java.util.Date
 
 internal class CameraFeedViewModel(
     private val getTargetAreaColorUseCase: GetTargetAreaColorUseCase,
+    private val timerIntervalUseCase: TimerIntervalUseCase,
+    private val colorRepository: ColorRepository,
     initialState: CameraFeedState = CameraFeedState()
 ) : ViewModel(), MVIViewModel<CameraFeedState, CameraFeedIntent, CameraFeedEffect> {
 
@@ -32,45 +37,61 @@ internal class CameraFeedViewModel(
     override fun dispatch(intent: CameraFeedIntent) {
         viewModelScope.launch {
             when (intent) {
-                is CameraFeedIntent.OnFrameAnalyze -> onFrameAnalyze(intent.bitmap, intent.targetRadius)
-                CameraFeedIntent.OnStartAnalysis -> _state.update { state -> state.copy(isAnalyzing = true) }
-                CameraFeedIntent.OnStopAnalysis -> _state.update { state -> state.copy(isAnalyzing = false) }
+                is CameraFeedIntent.OnFrameAnalyze -> onFrameAnalyze(intent.bitmapWrapper, intent.targetRadius)
+                CameraFeedIntent.OnStartAnalysis -> onStartAnalysis()
+                CameraFeedIntent.OnStopAnalysis -> onStopAnalysis()
                 CameraFeedIntent.OnCameraNotReady -> _sideEffects.send(CameraFeedEffect.ShowToastCameraNotReady)
+                CameraFeedIntent.OnGoToColorHistory -> onGoToColorHistory()
             }
         }
     }
 
-    private var lastSeen = Date()
-    private suspend fun onFrameAnalyze(bitmap: Bitmap, targetRadius: Float) {
-        if (Date().time - lastSeen.time < CAPTURE_ANALYSIS_INTERVAL) return
-        lastSeen = Date()
+    private suspend fun onFrameAnalyze(bitmap: BitmapWrapper, targetRadius: Float) {
+        // add a delay between frames analysis to avoid high CPU usage
+        if (!timerIntervalUseCase(CAPTURE_ANALYSIS_INTERVAL)) return
 
         getTargetAreaColorUseCase(bitmap, targetRadius)
             .onFailure {
                 _state.update { state ->
                     state.copy(
-                        colorInt = null,
-                        colorName = "ERROR",
-                        colorHex = "",
-                        colorRed = -1,
-                        colorGreen = -1,
-                        colorBlue = -1,
-                        colorLuminance = -1f
+                        colorPresentationModel = ColorPresentationModel(
+                            colorInt = null,
+                            colorName = "ERROR"
+                        )
                     )
                 }
             }
             .onSuccess { (color, colorName) ->
+                colorRepository.insertColor(
+                    ColorDTO(
+                        name = colorName,
+                        lastSeen = Date().time,
+                        colorInt = color
+                    )
+                )
                 _state.update { state ->
                     state.copy(
-                        colorInt = color,
-                        colorName = colorName,
-                        colorHex = Integer.toHexString(color).substring(2),
-                        colorRed = Color.red(color),
-                        colorGreen = Color.green(color),
-                        colorBlue = Color.blue(color),
-                        colorLuminance = Color.luminance(color)
+                        colorPresentationModel = ColorPresentationModel(
+                            colorInt = color,
+                            colorName = colorName
+                        )
                     )
                 }
             }
+    }
+
+    private fun onStartAnalysis() {
+        _sideEffects.trySend(CameraFeedEffect.StartFrameAnalysis)
+        _state.update { state -> state.copy(isAnalyzing = true) }
+    }
+
+    private fun onStopAnalysis() {
+        _sideEffects.trySend(CameraFeedEffect.StopFrameAnalysis)
+        _state.update { state -> state.copy(isAnalyzing = false) }
+    }
+
+    private fun onGoToColorHistory() {
+        _sideEffects.trySend(CameraFeedEffect.GoToColorHistory)
+        _state.update { state -> state.copy(isAnalyzing = false) }
     }
 }

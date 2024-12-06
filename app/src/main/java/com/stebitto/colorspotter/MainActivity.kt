@@ -8,7 +8,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.stebitto.common.theme.MyApplicationTheme
 import com.stebitto.navigation.CameraFeedRoutes
+import com.stebitto.navigation.ColorHistoryRoutes
 import com.stebitto.navigation.cameraFeedNavGraph
+import com.stebitto.navigation.colorHistoryNavGraph
 
 class MainActivity : ComponentActivity() {
 
@@ -24,7 +26,16 @@ class MainActivity : ComponentActivity() {
                     navController = navController,
                     startDestination = CameraFeedRoutes.CAMERA_FEED.name
                 ) {
-                    cameraFeedNavGraph()
+                    cameraFeedNavGraph(
+                        onNavigateToColorHistory = {
+                            navController.navigate(ColorHistoryRoutes.COLOR_HISTORY.name)
+                        }
+                    )
+                    colorHistoryNavGraph(
+                        onNavigateBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
             }
         }

@@ -2,6 +2,7 @@ package com.stebitto.feature_camera_feed.presentation
 
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Color as GraphicsColor
 import android.util.Size
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,11 +29,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.safeGesturesPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,13 +61,15 @@ import com.stebitto.common.theme.MyApplicationTheme
 import com.stebitto.common.theme.Typography
 import com.stebitto.feature_camera_feed.R
 import com.stebitto.feature_camera_feed.TARGET_RADIUS
+import com.stebitto.feature_camera_feed.models.BitmapWrapper
 import androidx.camera.core.Preview as CameraPreview
 import androidx.compose.ui.graphics.Color as ComposeColor
 
 @Composable
 internal fun CameraPreviewScreen(
     modifier: Modifier = Modifier,
-    viewModel: CameraFeedViewModel
+    viewModel: CameraFeedViewModel,
+    onGoToColorHistoryClick: () -> Unit
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
 
@@ -74,7 +83,12 @@ internal fun CameraPreviewScreen(
     }
 
     val analyzer = Analyzer { imageProxy ->
-        viewModel.dispatch(CameraFeedIntent.OnFrameAnalyze(imageProxy.toBitmap(), TARGET_RADIUS))
+        viewModel.dispatch(
+            CameraFeedIntent.OnFrameAnalyze(
+                BitmapWrapper(imageProxy.toBitmap()),
+                TARGET_RADIUS
+            )
+        )
         imageProxy.close()
     }
 
@@ -84,15 +98,34 @@ internal fun CameraPreviewScreen(
                 CameraFeedEffect.ShowToastCameraNotReady -> {
                     Toast.makeText(context, R.string.camera_not_ready, Toast.LENGTH_SHORT).show()
                 }
+                CameraFeedEffect.GoToColorHistory -> {
+                    imageAnalysis.clearAnalyzer()
+                    onGoToColorHistoryClick()
+                }
+                CameraFeedEffect.StartFrameAnalysis -> {
+                    imageAnalysis.setAnalyzer(
+                        ContextCompat.getMainExecutor(context),
+                        analyzer
+                    )
+                }
+                CameraFeedEffect.StopFrameAnalysis -> {
+                    imageAnalysis.clearAnalyzer()
+                }
             }
         }
     }
 
     val activityContext = LocalContext.current as ComponentActivity
-    LaunchedEffect(Unit) {
+    DisposableEffect(Unit) {
         activityContext.enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+            statusBarStyle = SystemBarStyle.dark(GraphicsColor.TRANSPARENT)
         )
+
+        onDispose {
+            activityContext.enableEdgeToEdge(
+                statusBarStyle = SystemBarStyle.auto(GraphicsColor.TRANSPARENT, GraphicsColor.TRANSPARENT)
+            )
+        }
     }
 
     Box(modifier.fillMaxSize()) {
@@ -104,38 +137,34 @@ internal fun CameraPreviewScreen(
 
         CircleHoleOverlay()
 
-        val color = state.value.colorInt?.let { ComposeColor(it) } ?: ComposeColor.Gray
+        val color = state.value.colorPresentationModel.colorInt?.let { ComposeColor(it) } ?: ComposeColor.Gray
         ColorNameBox(
             color = color,
-            colorName = state.value.colorName,
-            colorHex = state.value.colorHex,
-            colorRed = state.value.colorRed,
-            colorGreen = state.value.colorGreen,
-            colorBlue = state.value.colorBlue,
-            colorLuminance = state.value.colorLuminance
+            colorName = state.value.colorPresentationModel.colorName,
+            colorHex = state.value.colorPresentationModel.getColorHex(),
+            colorRed = state.value.colorPresentationModel.getColorRed(),
+            colorGreen = state.value.colorPresentationModel.getColorGreen(),
+            colorBlue = state.value.colorPresentationModel.getColorBlue(),
+            colorLuminance = state.value.colorPresentationModel.getColorLuminance()
         )
 
         ToggleFrameAnalyzeButton(
             isAnalyzing = state.value.isAnalyzing,
             color = color,
-            colorLuminance = state.value.colorLuminance,
-            onClick = {
+            colorLuminance = state.value.colorPresentationModel.getColorLuminance(),
+            onToggleFrameAnalyze = {
                 if (state.value.isAnalyzing) {
                     viewModel.dispatch(CameraFeedIntent.OnStopAnalysis)
-                    // Stop analyzing frames from camera
-                    imageAnalysis.clearAnalyzer()
                 } else {
                     if (isCameraSetup.value) {
                         viewModel.dispatch(CameraFeedIntent.OnStartAnalysis)
-                        // Start analyzing frames
-                        imageAnalysis.setAnalyzer(
-                            ContextCompat.getMainExecutor(context),
-                            analyzer
-                        )
                     } else {
                         viewModel.dispatch(CameraFeedIntent.OnCameraNotReady)
                     }
                 }
+            },
+            onGoToColorHistoryClick = {
+                viewModel.dispatch(CameraFeedIntent.OnGoToColorHistory)
             }
         )
     }
@@ -281,28 +310,61 @@ internal fun ColorNameBoxPreview() {
 }
 
 @Composable
+internal fun GoToColorHistoryButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+    FloatingActionButton(
+        modifier = modifier.padding(16.dp),
+        onClick = { onClick() }
+    ) {
+        Icon(
+            imageVector = Icons.Filled.History,
+            contentDescription = "Go to color history"
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+internal fun GoToColorHistoryButtonPreview() {
+    MyApplicationTheme {
+        GoToColorHistoryButton()
+    }
+}
+
+@Composable
 internal fun BoxScope.ToggleFrameAnalyzeButton(
     modifier: Modifier = Modifier,
     isAnalyzing: Boolean,
     color: ComposeColor,
     colorLuminance: Float,
-    onClick: () -> Unit = {}
+    onToggleFrameAnalyze: () -> Unit = {},
+    onGoToColorHistoryClick: () -> Unit = {}
 ) {
-    Button(
+    Row(
         modifier = modifier
             .align(Alignment.BottomCenter)
             .fillMaxWidth(0.8f)
             .safeGesturesPadding()
             .padding(bottom = 16.dp),
-        onClick = { onClick() },
-        colors = ButtonDefaults.buttonColors(containerColor = color),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = (if (isAnalyzing) stringResource(R.string.stop_text) else stringResource(R.string.start_text)).uppercase(),
-            color = if (colorLuminance < 0.5) ComposeColor.White else ComposeColor.Black,
-            style = Typography.headlineSmall
-        )
+        Button(
+            modifier = Modifier.weight(0.8f),
+            onClick = { onToggleFrameAnalyze() },
+            colors = ButtonDefaults.buttonColors(containerColor = color),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = (if (isAnalyzing) stringResource(R.string.stop_text) else stringResource(R.string.start_text)).uppercase(),
+                color = if (colorLuminance < 0.5) ComposeColor.White else ComposeColor.Black,
+                style = Typography.headlineSmall
+            )
+        }
+
+        GoToColorHistoryButton(onClick = { onGoToColorHistoryClick() })
     }
 }
 

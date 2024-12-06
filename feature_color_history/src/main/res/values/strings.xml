@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="acquired_screen_title">Acquired colors</string>
+    <string name="navigate_back_content_description">Navigate back</string>
+    <string name="sort_alphabetically_content_description">Sort alphabetically</string>
+    <string name="empty_history">No history found</string>
+    <string name="delete_content_description">Delete</string>
+</resources>
