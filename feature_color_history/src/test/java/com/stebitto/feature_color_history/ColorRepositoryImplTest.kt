@@ -29,8 +29,8 @@ class ColorRepositoryImplTest {
 
     @Test
     fun `getAllColors should return a list of colors`() = runTest {
-        val colorEntity = ColorEntity(1, "Red", 1234567890, "#FF0000", 255, 0, 0)
-        val colorDTO = ColorDTO(1, "Red", 1234567890, "#FF0000", 255, 0, 0)
+        val colorEntity = ColorEntity(1, "Red", 1234567890, 123456)
+        val colorDTO = ColorDTO(1, "Red", 1234567890, 123456)
         val colors = listOf(colorEntity)
         Mockito.`when`(colorLocalSource.getAllColors()).thenReturn(flowOf(colors))
         colorRepository.getAllColors().test {

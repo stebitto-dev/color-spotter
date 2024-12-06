@@ -9,7 +9,6 @@ internal data class ColorEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
     val lastSeen: Long,
-    val hexCode: String,
     val colorInt: Int
 ) {
     fun toColorDTO(): ColorDTO {
@@ -26,7 +25,6 @@ internal fun ColorDTO.toColorEntity(): ColorEntity {
     return ColorEntity(
         name = name,
         lastSeen = lastSeen,
-        hexCode = Integer.toHexString(colorInt).substring(2),
         colorInt = colorInt
     )
 }
