@@ -26,7 +26,7 @@ internal fun ColorDTO.toColorEntity(): ColorEntity {
     return ColorEntity(
         name = name,
         lastSeen = lastSeen,
-        hexCode = getHexCode(),
+        hexCode = Integer.toHexString(colorInt).substring(2),
         colorInt = colorInt
     )
 }

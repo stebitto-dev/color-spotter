@@ -6,6 +6,8 @@ import com.stebitto.feature_camera_feed.data.ColorNameRepository
 import com.stebitto.feature_camera_feed.data.ColorNameRepositoryImpl
 import com.stebitto.feature_camera_feed.data.GetTargetAreaColorUseCase
 import com.stebitto.feature_camera_feed.data.GetTargetAreaColorUseCaseImpl
+import com.stebitto.feature_camera_feed.data.TimerIntervalUseCase
+import com.stebitto.feature_camera_feed.data.TimerIntervalUseCaseImpl
 import com.stebitto.feature_camera_feed.data.retrofit.ColorAPIService
 import com.stebitto.feature_camera_feed.presentation.CameraFeedViewModel
 import okhttp3.OkHttpClient
@@ -24,8 +26,9 @@ val networkModule = module {
 }
 
 val featureCameraFeedModule = module {
-    viewModel { CameraFeedViewModel(get(), get()) }
+    viewModel { CameraFeedViewModel(get(), get(), get()) }
     factory<GetTargetAreaColorUseCase> { GetTargetAreaColorUseCaseImpl(get()) }
+    factory<TimerIntervalUseCase> { TimerIntervalUseCaseImpl() }
     factory<ColorNameRepository> { ColorNameRepositoryImpl(get()) }
     factory<ColorNameRemoteSource> { ColorNameRemoteSourceImpl(get()) }
     includes(networkModule)

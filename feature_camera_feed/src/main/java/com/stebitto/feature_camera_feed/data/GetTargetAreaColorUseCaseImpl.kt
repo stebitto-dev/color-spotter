@@ -13,7 +13,7 @@ internal class GetTargetAreaColorUseCaseImpl(
     override suspend fun invoke(bitmapWrapper: BitmapWrapper, targetRadius: Float): Result<Pair<Int, String>> = runCatching {
         return Result.success(
             withContext(Dispatchers.IO) {
-                val bitmap = bitmapWrapper.bitmap
+                val bitmap = bitmapWrapper.bitmap ?: throw IllegalStateException("Bitmap is null")
                 val xCoordinate = bitmap.width / 2f
                 val yCoordinate = bitmap.height / 2f
 

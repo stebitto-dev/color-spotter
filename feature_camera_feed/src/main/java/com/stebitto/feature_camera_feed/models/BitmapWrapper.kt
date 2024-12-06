@@ -8,5 +8,5 @@ import com.stebitto.feature_camera_feed.presentation.CameraFeedViewModel
  * Used by [CameraFeedViewModel] so that there is no direct dependency to Android framework.
  */
 data class BitmapWrapper(
-    val bitmap: Bitmap
+    val bitmap: Bitmap? = null
 )

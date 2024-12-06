@@ -1,5 +1,6 @@
 package com.stebitto.feature_color_history.models
 
+import android.graphics.Color
 import com.stebitto.common.data.ColorDTO
 
 internal data class ColorPresentationModel(
@@ -16,10 +17,7 @@ internal data class ColorPresentationModel(
             id = id,
             name = name,
             lastSeen = lastSeen,
-            hexCode = hexCode,
-            red = red,
-            green = green,
-            blue = blue
+            colorInt = Color.rgb(red, green, blue)
         )
     }
 }
@@ -29,9 +27,9 @@ internal fun ColorDTO.toColorPresentationModel(): ColorPresentationModel {
         id = id,
         name = name,
         lastSeen = lastSeen,
-        hexCode = hexCode,
-        red = red,
-        green = green,
-        blue = blue
+        hexCode = Integer.toHexString(colorInt).substring(2),
+        red = Color.red(colorInt),
+        green = Color.green(colorInt),
+        blue = Color.blue(colorInt)
     )
 }

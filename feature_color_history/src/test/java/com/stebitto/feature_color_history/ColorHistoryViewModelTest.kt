@@ -43,7 +43,7 @@ class ColorHistoryViewModelTest {
 
     @Test
     fun `dispatch LoadColors intent, update state with colors`() = runTest {
-        val colorDTO = ColorDTO(1, "Red", 1234567890, "#FF0000", 255, 0, 0)
+        val colorDTO = ColorDTO(1, "Red", 1234567890, 123456)
         val colorPresentationModel = ColorPresentationModel(1, "Red", 1234567890, "#FF0000", 255, 0, 0)
         val colorsDTO = listOf(colorDTO)
         val colorsPresentationModel = listOf(colorPresentationModel)

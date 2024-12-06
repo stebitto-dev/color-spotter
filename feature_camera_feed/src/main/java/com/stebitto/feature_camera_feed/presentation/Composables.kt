@@ -61,6 +61,7 @@ import com.stebitto.common.theme.MyApplicationTheme
 import com.stebitto.common.theme.Typography
 import com.stebitto.feature_camera_feed.R
 import com.stebitto.feature_camera_feed.TARGET_RADIUS
+import com.stebitto.feature_camera_feed.models.BitmapWrapper
 import androidx.camera.core.Preview as CameraPreview
 import androidx.compose.ui.graphics.Color as ComposeColor
 
@@ -82,7 +83,12 @@ internal fun CameraPreviewScreen(
     }
 
     val analyzer = Analyzer { imageProxy ->
-        viewModel.dispatch(CameraFeedIntent.OnFrameAnalyze(imageProxy.toBitmap(), TARGET_RADIUS))
+        viewModel.dispatch(
+            CameraFeedIntent.OnFrameAnalyze(
+                BitmapWrapper(imageProxy.toBitmap()),
+                TARGET_RADIUS
+            )
+        )
         imageProxy.close()
     }
 
@@ -131,21 +137,21 @@ internal fun CameraPreviewScreen(
 
         CircleHoleOverlay()
 
-        val color = state.value.colorInt?.let { ComposeColor(it) } ?: ComposeColor.Gray
+        val color = state.value.colorPresentationModel.colorInt?.let { ComposeColor(it) } ?: ComposeColor.Gray
         ColorNameBox(
             color = color,
-            colorName = state.value.colorName,
-            colorHex = state.value.colorHex,
-            colorRed = state.value.colorRed,
-            colorGreen = state.value.colorGreen,
-            colorBlue = state.value.colorBlue,
-            colorLuminance = state.value.colorLuminance
+            colorName = state.value.colorPresentationModel.colorName,
+            colorHex = state.value.colorPresentationModel.getColorHex(),
+            colorRed = state.value.colorPresentationModel.getColorRed(),
+            colorGreen = state.value.colorPresentationModel.getColorGreen(),
+            colorBlue = state.value.colorPresentationModel.getColorBlue(),
+            colorLuminance = state.value.colorPresentationModel.getColorLuminance()
         )
 
         ToggleFrameAnalyzeButton(
             isAnalyzing = state.value.isAnalyzing,
             color = color,
-            colorLuminance = state.value.colorLuminance,
+            colorLuminance = state.value.colorPresentationModel.getColorLuminance(),
             onToggleFrameAnalyze = {
                 if (state.value.isAnalyzing) {
                     viewModel.dispatch(CameraFeedIntent.OnStopAnalysis)
