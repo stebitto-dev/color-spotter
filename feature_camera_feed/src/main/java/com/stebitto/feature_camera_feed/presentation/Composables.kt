@@ -2,7 +2,6 @@ package com.stebitto.feature_camera_feed.presentation
 
 import android.content.Context
 import android.content.res.Configuration
-import android.graphics.Color as GraphicsColor
 import android.util.Size
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -29,12 +28,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.safeGesturesPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,10 +51,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -62,6 +70,8 @@ import com.stebitto.common.theme.Typography
 import com.stebitto.feature_camera_feed.R
 import com.stebitto.feature_camera_feed.TARGET_RADIUS
 import com.stebitto.feature_camera_feed.models.BitmapWrapper
+import com.stebitto.feature_camera_feed.models.ColorPresentationModel
+import android.graphics.Color as GraphicsColor
 import androidx.camera.core.Preview as CameraPreview
 import androidx.compose.ui.graphics.Color as ComposeColor
 
@@ -137,21 +147,10 @@ internal fun CameraPreviewScreen(
 
         CircleHoleOverlay()
 
-        val color = state.value.colorPresentationModel.colorInt?.let { ComposeColor(it) } ?: ComposeColor.Gray
-        ColorNameBox(
-            color = color,
-            colorName = state.value.colorPresentationModel.colorName,
-            colorHex = state.value.colorPresentationModel.getColorHex(),
-            colorRed = state.value.colorPresentationModel.getColorRed(),
-            colorGreen = state.value.colorPresentationModel.getColorGreen(),
-            colorBlue = state.value.colorPresentationModel.getColorBlue(),
-            colorLuminance = state.value.colorPresentationModel.getColorLuminance()
-        )
+        ColorNameBox(colorItem = state.value.colorPresentationModel)
 
         ToggleFrameAnalyzeButton(
             isAnalyzing = state.value.isAnalyzing,
-            color = color,
-            colorLuminance = state.value.colorPresentationModel.getColorLuminance(),
             onToggleFrameAnalyze = {
                 if (state.value.isAnalyzing) {
                     viewModel.dispatch(CameraFeedIntent.OnStopAnalysis)
@@ -251,42 +250,38 @@ internal fun CircleHoleOverlayPreview() {
 @Composable
 internal fun BoxScope.ColorNameBox(
     modifier: Modifier = Modifier,
-    color: ComposeColor,
-    colorName: String,
-    colorHex: String,
-    colorRed: Int,
-    colorGreen: Int,
-    colorBlue: Int,
-    colorLuminance: Float
+    colorItem: ColorPresentationModel
 ) {
-    Column(
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White,
+        ),
         modifier = modifier
             .safeContentPadding()
             .align(Alignment.TopCenter)
-            .height(170.dp)
-            .fillMaxWidth(0.8f)
-            .background(color = color),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(16.dp)
+            .fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(4.dp),
+        shape = RoundedCornerShape(8.dp)
     ) {
-        Text(
-            text = colorName,
-            color = if (colorLuminance < 0.5) ComposeColor.White else ComposeColor.Black,
-            style = Typography.headlineMedium
-        )
-        if (colorHex.isNotBlank()) {
-            Text(
-                text = "#${colorHex.uppercase()}",
-                color = if (colorLuminance < 0.5) ComposeColor.White else ComposeColor.Black,
-                style = Typography.headlineSmall
+        Row(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(color = Color(colorItem.getRed(), colorItem.getGreen(), colorItem.getBlue()))
             )
-        }
-        if (colorRed >= 0 && colorGreen >= 0 && colorBlue >= 0) {
-            Text(
-                text = "$colorRed, $colorGreen, $colorBlue",
-                color = if (colorLuminance < 0.5) ComposeColor.White else ComposeColor.Black,
-                style = Typography.headlineSmall
-            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = colorItem.colorName, fontWeight = FontWeight.Black)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Hex: ${colorItem.getColorHex().uppercase()}", style = Typography.bodyLarge)
+                Text(text = "RGB: (${colorItem.getRed()}, ${colorItem.getGreen()}, ${colorItem.getBlue()})", style = Typography.bodyLarge)
+            }
         }
     }
 }
@@ -297,13 +292,10 @@ internal fun ColorNameBoxPreview() {
     MyApplicationTheme {
         Box(modifier = Modifier.fillMaxWidth()) {
             ColorNameBox(
-                color = ComposeColor.Gray,
-                colorName = "Color name",
-                colorHex = "000000",
-                colorRed = 0,
-                colorGreen = 0,
-                colorBlue = 0,
-                colorLuminance = 0.4f
+                colorItem = ColorPresentationModel(
+                    colorInt = android.graphics.Color.CYAN,
+                    colorName = "Color name"
+                )
             )
         }
     }
@@ -314,9 +306,10 @@ internal fun GoToColorHistoryButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
-    FloatingActionButton(
-        modifier = modifier.padding(16.dp),
-        onClick = { onClick() }
+    IconButton(
+        modifier = modifier.size(48.dp),
+        onClick = { onClick() },
+        colors = IconButtonDefaults.iconButtonColors(containerColor = Color.White)
     ) {
         Icon(
             imageVector = Icons.Filled.History,
@@ -325,44 +318,37 @@ internal fun GoToColorHistoryButton(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF000000)
-@Composable
-internal fun GoToColorHistoryButtonPreview() {
-    MyApplicationTheme {
-        GoToColorHistoryButton()
-    }
-}
-
 @Composable
 internal fun BoxScope.ToggleFrameAnalyzeButton(
     modifier: Modifier = Modifier,
     isAnalyzing: Boolean,
-    color: ComposeColor,
-    colorLuminance: Float,
     onToggleFrameAnalyze: () -> Unit = {},
     onGoToColorHistoryClick: () -> Unit = {}
 ) {
     Row(
         modifier = modifier
             .align(Alignment.BottomCenter)
-            .fillMaxWidth(0.8f)
             .safeGesturesPadding()
-            .padding(bottom = 16.dp),
+            .padding(16.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Button(
-            modifier = Modifier.weight(0.8f),
             onClick = { onToggleFrameAnalyze() },
-            colors = ButtonDefaults.buttonColors(containerColor = color),
+            modifier = Modifier.weight(0.8f),
+            shape = RoundedCornerShape(8.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.White),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
             Text(
                 text = (if (isAnalyzing) stringResource(R.string.stop_text) else stringResource(R.string.start_text)).uppercase(),
-                color = if (colorLuminance < 0.5) ComposeColor.White else ComposeColor.Black,
-                style = Typography.headlineSmall
+                fontWeight = FontWeight.W500,
+                style = Typography.headlineSmall,
+                color = Color.Black
             )
         }
+
+        Spacer(modifier = Modifier.width(16.dp))
 
         GoToColorHistoryButton(onClick = { onGoToColorHistoryClick() })
     }
@@ -373,11 +359,7 @@ internal fun BoxScope.ToggleFrameAnalyzeButton(
 internal fun ToggleFrameAnalyzeButtonPreview() {
     MyApplicationTheme {
         Box(modifier = Modifier.fillMaxWidth()) {
-            ToggleFrameAnalyzeButton(
-                isAnalyzing = true,
-                color = ComposeColor.Gray,
-                colorLuminance = 0.4f
-            )
+            ToggleFrameAnalyzeButton(isAnalyzing = true)
         }
     }
 }
