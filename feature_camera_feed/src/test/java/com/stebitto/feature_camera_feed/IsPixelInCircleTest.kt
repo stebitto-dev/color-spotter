@@ -7,7 +7,7 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-class GetTargetAreaColorUseCaseTest {
+class IsPixelInCircleTest {
 
     @Mock
     private lateinit var colorNameRepository: ColorNameRepository

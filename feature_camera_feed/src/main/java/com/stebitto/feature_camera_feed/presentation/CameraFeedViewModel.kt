@@ -40,7 +40,6 @@ internal class CameraFeedViewModel(
                 is CameraFeedIntent.OnFrameAnalyze -> onFrameAnalyze(intent.bitmapWrapper, intent.targetRadius)
                 CameraFeedIntent.OnStartAnalysis -> onStartAnalysis()
                 CameraFeedIntent.OnStopAnalysis -> onStopAnalysis()
-                CameraFeedIntent.OnCameraNotReady -> _sideEffects.send(CameraFeedEffect.ShowToastCameraNotReady)
                 CameraFeedIntent.OnGoToColorHistory -> onGoToColorHistory()
             }
         }
@@ -81,17 +80,15 @@ internal class CameraFeedViewModel(
     }
 
     private fun onStartAnalysis() {
-        _sideEffects.trySend(CameraFeedEffect.StartFrameAnalysis)
         _state.update { state -> state.copy(isAnalyzing = true) }
     }
 
     private fun onStopAnalysis() {
-        _sideEffects.trySend(CameraFeedEffect.StopFrameAnalysis)
         _state.update { state -> state.copy(isAnalyzing = false) }
     }
 
     private fun onGoToColorHistory() {
-        _sideEffects.trySend(CameraFeedEffect.GoToColorHistory)
         _state.update { state -> state.copy(isAnalyzing = false) }
+        _sideEffects.trySend(CameraFeedEffect.GoToColorHistory)
     }
 }

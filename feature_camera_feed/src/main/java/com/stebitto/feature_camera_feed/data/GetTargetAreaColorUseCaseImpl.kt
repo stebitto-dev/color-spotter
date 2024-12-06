@@ -21,16 +21,13 @@ internal class GetTargetAreaColorUseCaseImpl(
                 val bluesList = mutableListOf<Int>()
                 val greensList = mutableListOf<Int>()
 
-                for (x in (xCoordinate - targetRadius).toInt() until (xCoordinate + targetRadius).toInt()) {
-                    for (y in (yCoordinate - targetRadius).toInt() until (yCoordinate + targetRadius).toInt()) {
+                for (x in (xCoordinate - targetRadius).toInt()..(xCoordinate + targetRadius).toInt()) {
+                    for (y in (yCoordinate - targetRadius).toInt()..(yCoordinate + targetRadius).toInt()) {
                         val point = bitmap.getPixel(x, y)
                         if (isPixelInCircle(x.toFloat(), y.toFloat(), xCoordinate, yCoordinate, targetRadius)) {
-                            val red = Color.red(point)
-                            redsList.add(red)
-                            val green = Color.green(point)
-                            greensList.add(green)
-                            val blue = Color.blue(point)
-                            bluesList.add(blue)
+                            redsList.add(Color.red(point))
+                            greensList.add(Color.green(point))
+                            bluesList.add(Color.blue(point))
                         }
                     }
                 }
