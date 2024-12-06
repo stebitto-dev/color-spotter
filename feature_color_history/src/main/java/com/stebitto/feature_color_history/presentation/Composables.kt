@@ -161,7 +161,7 @@ internal fun ColorItemCard(
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(color = Color(colorItem.red, colorItem.green, colorItem.blue))
+                    .background(color = Color(colorItem.getRed(), colorItem.getGreen(), colorItem.getBlue()))
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column(
@@ -171,8 +171,8 @@ internal fun ColorItemCard(
                 Row {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(text = colorItem.lastSeen.formatTimestamp(), style = Typography.bodyMedium)
-                        Text(text = "Hex: ${colorItem.hexCode.uppercase()}", style = Typography.bodyMedium)
-                        Text(text = "RGB: (${colorItem.red}, ${colorItem.green}, ${colorItem.blue})", style = Typography.bodyMedium)
+                        Text(text = "Hex: ${colorItem.getColorHex().uppercase()}", style = Typography.bodyMedium)
+                        Text(text = "RGB: (${colorItem.getRed()}, ${colorItem.getGreen()}, ${colorItem.getBlue()})", style = Typography.bodyMedium)
                     }
                     IconButton(
                         modifier = Modifier.align(Alignment.Bottom),

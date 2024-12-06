@@ -8,6 +8,7 @@ import com.stebitto.feature_color_history.models.ColorPresentationModel
 import com.stebitto.feature_color_history.presentation.ColorHistoryIntent
 import com.stebitto.feature_color_history.presentation.ColorHistoryState
 import com.stebitto.feature_color_history.presentation.ColorHistoryViewModel
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -17,6 +18,8 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 
 class ColorHistoryViewModelTest {
 
@@ -59,16 +62,21 @@ class ColorHistoryViewModelTest {
         }
     }
 
-//    @Test
-//    fun `dispatch LoadColors intent, update state with error message if repository throws exception`() = runTest {
-//        val expectedState = ColorHistoryState(errorMessage = "Error loading colors")
-//        Mockito.`when`(colorRepository.getAllColors()).thenThrow(RuntimeException("Error loading colors"))
-//        viewModel.state.test {
-//            awaitItem() // initial state
-//            viewModel.dispatch(ColorHistoryIntent.LoadColors)
-//            assertEquals(expectedState, awaitItem())
-//        }
-//    }
+    @Test
+    fun `dispatch LoadColors intent, update state with error message if repository throws exception`() = runTest {
+        val errorMessage = "Error loading colors"
+        val expectedState = ColorHistoryState(errorMessage = errorMessage)
+        val mock = mock<ColorRepository> {
+            on { getAllColors() } doReturn flow { throw RuntimeException(errorMessage) }
+        }
+        viewModel = ColorHistoryViewModel(mock)
+
+        viewModel.state.test {
+            awaitItem() // initial state
+            viewModel.dispatch(ColorHistoryIntent.LoadColors)
+            assertEquals(expectedState, awaitItem())
+        }
+    }
 
     @Test
     fun `dispatch OnSortColors intent, update state with sortAlphabetically set to true`() = runTest {
