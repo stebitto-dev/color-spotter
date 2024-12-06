@@ -10,5 +10,4 @@ internal data class ColorPresentationModel(
     fun getRed(): Int = colorInt?.let { Color.red(it) } ?: -1
     fun getGreen(): Int = colorInt?.let { Color.green(it) } ?: -1
     fun getBlue(): Int = colorInt?.let { Color.blue(it) } ?: -1
-    fun getColorLuminance(): Float = colorInt?.let { Color.luminance(it) } ?: -1f
 }

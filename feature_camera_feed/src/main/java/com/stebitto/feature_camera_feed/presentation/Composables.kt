@@ -275,8 +275,15 @@ internal fun BoxScope.ColorNameBox(
             ) {
                 Text(text = colorItem.colorName, fontWeight = FontWeight.Black)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Hex: ${colorItem.getColorHex().uppercase()}", style = Typography.bodyLarge)
-                Text(text = "RGB: (${colorItem.getRed()}, ${colorItem.getGreen()}, ${colorItem.getBlue()})", style = Typography.bodyLarge)
+                if (colorItem.getColorHex().isNotBlank()) {
+                    Text(
+                        text = "Hex: ${colorItem.getColorHex().uppercase()}",
+                        style = Typography.bodyLarge
+                    )
+                }
+                if (colorItem.colorInt != null) {
+                    Text(text = "RGB: (${colorItem.getRed()}, ${colorItem.getGreen()}, ${colorItem.getBlue()})", style = Typography.bodyLarge)
+                }
             }
         }
     }
