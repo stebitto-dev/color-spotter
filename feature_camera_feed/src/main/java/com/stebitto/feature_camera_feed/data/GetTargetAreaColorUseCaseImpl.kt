@@ -14,27 +14,32 @@ internal class GetTargetAreaColorUseCaseImpl(
         return Result.success(
             withContext(Dispatchers.IO) {
                 val bitmap = bitmapWrapper.bitmap ?: throw IllegalStateException("Bitmap is null")
-                val xCoordinate = bitmap.width / 2f
-                val yCoordinate = bitmap.height / 2f
+                val centerXCoordinate = bitmap.width / 2f
+                val centerYCoordinate = bitmap.height / 2f
 
-                val redsList = mutableListOf<Int>()
-                val bluesList = mutableListOf<Int>()
-                val greensList = mutableListOf<Int>()
+                var redSum = 0
+                var greenSum = 0
+                var blueSum = 0
+                var pixelCount = 0
 
-                for (x in (xCoordinate - targetRadius).toInt()..(xCoordinate + targetRadius).toInt()) {
-                    for (y in (yCoordinate - targetRadius).toInt()..(yCoordinate + targetRadius).toInt()) {
-                        val point = bitmap.getPixel(x, y)
-                        if (isPixelInCircle(x.toFloat(), y.toFloat(), xCoordinate, yCoordinate, targetRadius)) {
-                            redsList.add(Color.red(point))
-                            greensList.add(Color.green(point))
-                            bluesList.add(Color.blue(point))
+                // cycle through the square identified by the target radius
+                for (x in (centerXCoordinate - targetRadius).toInt()..(centerXCoordinate + targetRadius).toInt()) {
+                    for (y in (centerYCoordinate - targetRadius).toInt()..(centerYCoordinate + targetRadius).toInt()) {
+                        // take in consideration only pixels inside the target radius
+                        if (isPixelInCircle(x.toFloat(), y.toFloat(), centerXCoordinate, centerYCoordinate, targetRadius)) {
+                            val point = bitmap.getPixel(x, y)
+                            redSum += Color.red(point)
+                            greenSum += Color.green(point)
+                            blueSum += Color.blue(point)
+                            pixelCount++
                         }
                     }
                 }
 
-                val redAverage = redsList.average()
-                val greenAverage = greensList.average()
-                val blueAverage = bluesList.average()
+                // calculate the average color
+                val redAverage = redSum / pixelCount.toFloat()
+                val greenAverage = greenSum / pixelCount.toFloat()
+                val blueAverage = blueSum / pixelCount.toFloat()
 
                 val color = Color.rgb(redAverage.toInt(), greenAverage.toInt(), blueAverage.toInt())
                 color to colorNameRepository.getColorName(redAverage, greenAverage, blueAverage).getOrThrow()
