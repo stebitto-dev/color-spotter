@@ -1,25 +1,20 @@
 package com.stebitto.feature_camera_feed.presentation
 
-import android.graphics.Bitmap
 import com.stebitto.common.Effect
 import com.stebitto.common.Intent
 import com.stebitto.common.State
+import com.stebitto.feature_camera_feed.models.BitmapWrapper
+import com.stebitto.feature_camera_feed.models.ColorPresentationModel
 
 internal data class CameraFeedState(
     val isAnalyzing: Boolean = false,
-    val colorInt: Int? = null,
-    val colorName: String = "",
-    val colorHex: String = "",
-    val colorRed: Int = -1,
-    val colorGreen: Int = -1,
-    val colorBlue: Int = -1,
-    val colorLuminance: Float = -1f
+    val colorPresentationModel: ColorPresentationModel = ColorPresentationModel()
 ) : State
 
 internal sealed class CameraFeedIntent : Intent {
     data object OnStartAnalysis : CameraFeedIntent()
     data object OnStopAnalysis : CameraFeedIntent()
-    data class OnFrameAnalyze(val bitmap: Bitmap, val targetRadius: Float) : CameraFeedIntent()
+    data class OnFrameAnalyze(val bitmapWrapper: BitmapWrapper, val targetRadius: Float) : CameraFeedIntent()
     data object OnCameraNotReady : CameraFeedIntent()
     data object OnGoToColorHistory : CameraFeedIntent()
 }

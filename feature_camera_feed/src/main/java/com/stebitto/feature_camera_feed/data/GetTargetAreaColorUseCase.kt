@@ -1,7 +1,7 @@
 package com.stebitto.feature_camera_feed.data
 
-import android.graphics.Bitmap
+import com.stebitto.feature_camera_feed.models.BitmapWrapper
 
-interface GetTargetAreaColorUseCase {
-    suspend operator fun invoke(bitmap: Bitmap, targetRadius: Float): Result<Pair<Int, String>>
+internal interface GetTargetAreaColorUseCase {
+    suspend operator fun invoke(bitmapWrapper: BitmapWrapper, targetRadius: Float): Result<Pair<Int, String>>
 }

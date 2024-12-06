@@ -10,19 +10,14 @@ internal data class ColorEntity(
     val name: String,
     val lastSeen: Long,
     val hexCode: String,
-    val red: Int,
-    val green: Int,
-    val blue: Int
+    val colorInt: Int
 ) {
     fun toColorDTO(): ColorDTO {
         return ColorDTO(
             id = id,
             name = name,
             lastSeen = lastSeen,
-            hexCode = hexCode,
-            red = red,
-            green = green,
-            blue = blue
+            colorInt = colorInt
         )
     }
 }
@@ -31,9 +26,7 @@ internal fun ColorDTO.toColorEntity(): ColorEntity {
     return ColorEntity(
         name = name,
         lastSeen = lastSeen,
-        hexCode = hexCode,
-        red = red,
-        green = green,
-        blue = blue
+        hexCode = getHexCode(),
+        colorInt = colorInt
     )
 }

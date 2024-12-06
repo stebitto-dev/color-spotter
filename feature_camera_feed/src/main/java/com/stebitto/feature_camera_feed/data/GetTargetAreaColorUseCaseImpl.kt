@@ -1,7 +1,7 @@
 package com.stebitto.feature_camera_feed.data
 
-import android.graphics.Bitmap
 import android.graphics.Color
+import com.stebitto.feature_camera_feed.models.BitmapWrapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.VisibleForTesting
@@ -10,9 +10,10 @@ internal class GetTargetAreaColorUseCaseImpl(
     private val colorNameRepository: ColorNameRepository
 ) : GetTargetAreaColorUseCase {
 
-    override suspend fun invoke(bitmap: Bitmap, targetRadius: Float): Result<Pair<Int, String>> = runCatching {
+    override suspend fun invoke(bitmapWrapper: BitmapWrapper, targetRadius: Float): Result<Pair<Int, String>> = runCatching {
         return Result.success(
             withContext(Dispatchers.IO) {
+                val bitmap = bitmapWrapper.bitmap
                 val xCoordinate = bitmap.width / 2f
                 val yCoordinate = bitmap.height / 2f
 

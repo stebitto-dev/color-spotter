@@ -3,8 +3,8 @@ package com.stebitto.feature_camera_feed
 import com.stebitto.common.MainDispatcherRule
 import com.stebitto.feature_camera_feed.data.ColorNameRemoteSource
 import com.stebitto.feature_camera_feed.data.ColorNameRepositoryImpl
-import com.stebitto.feature_camera_feed.data.retrofit.ColorRemoteModel
-import com.stebitto.feature_camera_feed.data.retrofit.NameRemoteModel
+import com.stebitto.feature_camera_feed.models.ColorNameRemoteModel
+import com.stebitto.feature_camera_feed.models.NameRemoteModel
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -33,7 +33,7 @@ class ColorNameRepositoryTest {
     @Test
     fun `getColorName should return the correct color name`() = runTest {
         val colorName = "Test Color"
-        val remoteModel = ColorRemoteModel(NameRemoteModel(colorName, "#000000"))
+        val remoteModel = ColorNameRemoteModel(NameRemoteModel(colorName, "#000000"))
         Mockito.`when`(colorNameRemoteSource.getColorName(123, 456, 789)).thenReturn(remoteModel)
         val result = colorNameRepository.getColorName(123.0, 456.0, 789.0)
         assert(result.isSuccess)
