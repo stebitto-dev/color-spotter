@@ -47,6 +47,7 @@ internal class CameraFeedViewModel(
     }
 
     private suspend fun onFrameAnalyze(bitmap: BitmapWrapper, targetRadius: Float) {
+        // add a delay between frames analysis to avoid high CPU usage
         if (!timerIntervalUseCase(CAPTURE_ANALYSIS_INTERVAL)) return
 
         getTargetAreaColorUseCase(bitmap, targetRadius)
