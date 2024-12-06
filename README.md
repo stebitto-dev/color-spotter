@@ -18,7 +18,7 @@ The project is divided into following modules:
 
 Architecture is following MVI pattern.
 
-Color quantization is done in *GetTargetAreaColorUseCaseImpl* class. Starting from the provided Bitmap and target radius, a circle area spanning from the center of the frame is analyzed. For every pixel, his red, green and blue channels are stored in separated lists; the averages of these three channels are going to identify the resulting color. From that, a simple request to [The Color API](https://www.thecolorapi.com/) is going to provide the color name shown to the final user.
+Color quantization is done in *GetTargetAreaColorUseCaseImpl* class. Starting from the provided Bitmap and target radius, a circle area spanning from the center of the frame is analyzed. For every pixel, his red, green and blue channels summarized incrementally into separate variables; the averages of these three channels are going to identify the resulting color. From that, a simple request to [The Color API](https://www.thecolorapi.com/) is going to provide the color name shown to the final user.
 
 Moving to color history feature, the result of every frame analysis is stored in a local database. From the apposite view, the user is able to see the whole list ordered chronologically or alphabetically, together with the possibility to delete color entries one by one.
 
