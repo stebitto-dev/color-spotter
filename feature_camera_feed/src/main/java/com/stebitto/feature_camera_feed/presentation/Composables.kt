@@ -144,7 +144,9 @@ internal fun CameraPreviewScreen(
 
         CircleHoleOverlay()
 
-        ColorNameBox(colorItem = state.value.colorPresentationModel)
+        if (state.value.colorPresentationModel.colorInt != null && state.value.colorPresentationModel.colorName.isNotBlank()) {
+            ColorNameBox(colorItem = state.value.colorPresentationModel)
+        }
 
         ToggleFrameAnalyzeButton(
             isAnalyzing = state.value.isAnalyzing,
