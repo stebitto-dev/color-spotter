@@ -7,11 +7,13 @@ internal data class ColorPresentationModel(
     val id: Int,
     val name: String,
     val lastSeen: Long,
-    val hexCode: String,
-    val red: Int,
-    val green: Int,
-    val blue: Int
+    val colorInt: Int
 ) {
+    val hexCode: String = Integer.toHexString(colorInt).substring(2)
+    val red: Int = Color.red(colorInt)
+    val green: Int = Color.green(colorInt)
+    val blue: Int = Color.blue(colorInt)
+
     fun toColorDTO(): ColorDTO {
         return ColorDTO(
             id = id,
@@ -27,9 +29,6 @@ internal fun ColorDTO.toColorPresentationModel(): ColorPresentationModel {
         id = id,
         name = name,
         lastSeen = lastSeen,
-        hexCode = Integer.toHexString(colorInt).substring(2),
-        red = Color.red(colorInt),
-        green = Color.green(colorInt),
-        blue = Color.blue(colorInt)
+        colorInt = colorInt
     )
 }

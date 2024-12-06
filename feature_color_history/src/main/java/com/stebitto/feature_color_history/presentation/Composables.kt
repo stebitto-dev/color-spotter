@@ -171,7 +171,7 @@ internal fun ColorItemCard(
                 Row {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(text = colorItem.lastSeen.formatTimestamp(), style = Typography.bodyMedium)
-                        Text(text = "Hex: ${colorItem.hexCode}", style = Typography.bodyMedium)
+                        Text(text = "Hex: ${colorItem.hexCode.uppercase()}", style = Typography.bodyMedium)
                         Text(text = "RGB: (${colorItem.red}, ${colorItem.green}, ${colorItem.blue})", style = Typography.bodyMedium)
                     }
                     IconButton(
@@ -200,11 +200,8 @@ internal fun ColorItemCardPreview() {
             colorItem = ColorPresentationModel(
                 id = 1,
                 name = "Color Name",
-                hexCode = "#FFFFFF",
-                red = 255,
-                green = 255,
-                blue = 255,
-                lastSeen = System.currentTimeMillis()
+                lastSeen = System.currentTimeMillis(),
+                colorInt = android.graphics.Color.CYAN
             )
         )
     }

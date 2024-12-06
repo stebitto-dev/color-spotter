@@ -29,7 +29,7 @@ class AcquiredColorScreenTest {
         composeTestRule.setContent {
             ColorList(
                 sortAlphabetically = false,
-                colorItems = listOf(ColorPresentationModel(1, "Color 1", 1234567890, "#FF0000", 255, 0, 0)),
+                colorItems = listOf(ColorPresentationModel(1, "Color 1", 1234567890, 123456)),
                 errorMessage = null
             )
         }
