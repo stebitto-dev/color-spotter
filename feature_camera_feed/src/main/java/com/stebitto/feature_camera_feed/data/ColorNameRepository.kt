@@ -1,5 +1,5 @@
 package com.stebitto.feature_camera_feed.data
 
 internal interface ColorNameRepository {
-    suspend fun getColorName(red: Double, green: Double, blue: Double): Result<String>
+    suspend fun getColorName(red: Float, green: Float, blue: Float): Result<String>
 }

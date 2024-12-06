@@ -35,7 +35,7 @@ class ColorNameRepositoryTest {
         val colorName = "Test Color"
         val remoteModel = ColorNameRemoteModel(NameRemoteModel(colorName, "#000000"))
         Mockito.`when`(colorNameRemoteSource.getColorName(123, 456, 789)).thenReturn(remoteModel)
-        val result = colorNameRepository.getColorName(123.0, 456.0, 789.0)
+        val result = colorNameRepository.getColorName(123f, 456f, 789f)
         assert(result.isSuccess)
         assertEquals(result.getOrNull(), colorName)
     }
@@ -44,7 +44,7 @@ class ColorNameRepositoryTest {
     fun `getColorName should return an error when the remote source throws an exception`() = runTest {
         val exception = RuntimeException("Test exception")
         Mockito.`when`(colorNameRemoteSource.getColorName(123, 456, 789)).thenThrow(exception)
-        val result = colorNameRepository.getColorName(123.0, 456.0, 789.0)
+        val result = colorNameRepository.getColorName(123f, 456f, 789f)
         assert(result.isFailure)
         assertEquals(result.exceptionOrNull(), exception)
     }
